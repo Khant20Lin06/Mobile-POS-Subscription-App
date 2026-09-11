@@ -124,6 +124,117 @@ class ThermalReceiptFormatter {
     return buffer.toString();
   }
 
+  /// Format 58mm/80mm ESC/POS Debt Repayment Voucher Slip
+  static String formatDebtRepaymentSlip({
+    required String shopName,
+    String? shopPhone,
+    String? shopAddress,
+    required String customerName,
+    String? customerPhone,
+    required String receiptId,
+    required DateTime date,
+    required double previousDebt,
+    required double amountPaid,
+    required double remainingDebt,
+    required String paymentMethod,
+    String? notes,
+    int lineWidth = 32,
+  }) {
+    final buffer = StringBuffer();
+    final div = '=' * lineWidth;
+    final thinDiv = '-' * lineWidth;
+
+    buffer.writeln(_center(shopName.toUpperCase(), lineWidth));
+    if (shopPhone != null && shopPhone.isNotEmpty) {
+      buffer.writeln(_center('Tel: $shopPhone', lineWidth));
+    }
+    if (shopAddress != null && shopAddress.isNotEmpty) {
+      buffer.writeln(_center(shopAddress, lineWidth));
+    }
+    buffer.writeln(div);
+    buffer.writeln(_center('** DEBT REPAYMENT SLIP **', lineWidth));
+    buffer.writeln(_center('(အကြွေးဆပ်ပြေစာ)', lineWidth));
+    buffer.writeln(thinDiv);
+
+    buffer.writeln(_twoColumns('Voucher #:', receiptId.length > 12 ? receiptId.substring(0, 12) : receiptId, lineWidth));
+    buffer.writeln(_twoColumns('Date:', _dateFormat.format(date), lineWidth));
+    buffer.writeln(_twoColumns('Customer:', customerName, lineWidth));
+    if (customerPhone != null && customerPhone.isNotEmpty) {
+      buffer.writeln(_twoColumns('Phone:', customerPhone, lineWidth));
+    }
+    buffer.writeln(_twoColumns('Payment Mode:', paymentMethod, lineWidth));
+    buffer.writeln(thinDiv);
+
+    buffer.writeln(_twoColumns('Previous Debt:', '${_currencyFormat.format(previousDebt)} MMK', lineWidth));
+    buffer.writeln(_twoColumns('Amount Repaid:', '${_currencyFormat.format(amountPaid)} MMK', lineWidth));
+    buffer.writeln(thinDiv);
+    buffer.writeln(_twoColumns('REMAINING DEBT:', '${_currencyFormat.format(remainingDebt)} MMK', lineWidth));
+    buffer.writeln(div);
+
+    if (notes != null && notes.isNotEmpty) {
+      buffer.writeln('Note: $notes');
+      buffer.writeln(thinDiv);
+    }
+
+    buffer.writeln(_center('Thank you for your payment!', lineWidth));
+    buffer.writeln(_center('(ကျေးဇူးတင်ပါသည်)', lineWidth));
+    buffer.writeln('\n\n');
+
+    return buffer.toString();
+  }
+
+  /// Format 58mm/80mm ESC/POS Customer Account Statement Slip
+  static String formatCustomerStatementSlip({
+    required String shopName,
+    String? shopPhone,
+    required String customerName,
+    String? customerPhone,
+    required DateTime date,
+    required double totalDebt,
+    required List<Map<String, dynamic>> transactions,
+    int lineWidth = 32,
+  }) {
+    final buffer = StringBuffer();
+    final div = '=' * lineWidth;
+    final thinDiv = '-' * lineWidth;
+
+    buffer.writeln(_center(shopName.toUpperCase(), lineWidth));
+    if (shopPhone != null && shopPhone.isNotEmpty) {
+      buffer.writeln(_center('Tel: $shopPhone', lineWidth));
+    }
+    buffer.writeln(div);
+    buffer.writeln(_center('** CUSTOMER ACCOUNT STATEMENT **', lineWidth));
+    buffer.writeln(_center('(အကြွေးရှင်းတမ်း မှတ်တမ်း)', lineWidth));
+    buffer.writeln(thinDiv);
+
+    buffer.writeln(_twoColumns('Statement Date:', _dateFormat.format(date), lineWidth));
+    buffer.writeln(_twoColumns('Customer:', customerName, lineWidth));
+    if (customerPhone != null && customerPhone.isNotEmpty) {
+      buffer.writeln(_twoColumns('Phone:', customerPhone, lineWidth));
+    }
+    buffer.writeln(thinDiv);
+
+    buffer.writeln(_center('-- RECENT MOVEMENTS --', lineWidth));
+    for (final tx in transactions) {
+      final txDate = tx['date'] as DateTime? ?? DateTime.now();
+      final type = tx['type'] as String? ?? 'TX';
+      final amount = tx['amount'] as double? ?? 0.0;
+      final isIncrease = type == 'DEBT_INCREASE';
+
+      final typeLabel = isIncrease ? '[CREDIT +]' : '[PAID -]';
+      buffer.writeln('${_dateFormat.format(txDate).substring(5, 16)} $typeLabel');
+      buffer.writeln(_twoColumns('Amount:', '${_currencyFormat.format(amount)} MMK', lineWidth));
+    }
+
+    buffer.writeln(div);
+    buffer.writeln(_twoColumns('TOTAL OUTSTANDING:', '${_currencyFormat.format(totalDebt)} MMK', lineWidth));
+    buffer.writeln(div);
+    buffer.writeln(_center('DOT POS System Generated', lineWidth));
+    buffer.writeln('\n\n');
+
+    return buffer.toString();
+  }
+
   static String _center(String text, int width) {
     if (text.length >= width) return text;
     final leftPadding = (width - text.length) ~/ 2;

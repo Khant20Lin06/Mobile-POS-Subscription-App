@@ -3,16 +3,44 @@ import 'package:flutter/services.dart';
 import '../../../core/hardware/thermal_receipt_service.dart';
 
 class ReceiptDialog extends StatelessWidget {
-  final ReceiptData receipt;
+  final ReceiptData? receipt;
+  final String? receiptText;
+  final String? title;
+  final String? orderNumber;
 
   const ReceiptDialog({
     super.key,
-    required this.receipt,
+    this.receipt,
+    this.receiptText,
+    this.title,
+    this.orderNumber,
   });
+
+  /// Static helper to quickly display receipt dialog from anywhere
+  static Future<void> show(
+    BuildContext context, {
+    ReceiptData? receipt,
+    String? receiptText,
+    String? title,
+    String? orderNumber,
+  }) {
+    return showDialog(
+      context: context,
+      builder: (ctx) => ReceiptDialog(
+        receipt: receipt,
+        receiptText: receiptText,
+        title: title,
+        orderNumber: orderNumber,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final formattedText = ThermalReceiptFormatter.format58mm(receipt);
+    final formattedText = receiptText ??
+        (receipt != null ? ThermalReceiptFormatter.format58mm(receipt!) : '');
+    final displayTitle = title ?? (receipt != null ? 'Order Completed!' : 'Receipt Preview');
+    final slipRef = orderNumber ?? receipt?.orderNumber ?? 'Slip';
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -44,9 +72,9 @@ class ReceiptDialog extends StatelessWidget {
                 children: [
                   const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 22),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Order Completed!',
-                    style: TextStyle(
+                  Text(
+                    displayTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -137,7 +165,7 @@ class ReceiptDialog extends StatelessWidget {
                               children: [
                                 const Icon(Icons.print, color: Colors.white),
                                 const SizedBox(width: 10),
-                                Text('Printed ${receipt.orderNumber} to Thermal Printer!'),
+                                Text('Printed $slipRef to Thermal Printer!'),
                               ],
                             ),
                           ),

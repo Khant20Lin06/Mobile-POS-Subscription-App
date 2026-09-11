@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../customers/screens/customers_screen.dart';
 import '../diagnostics/diagnostics_screen.dart';
 import '../inventory/screens/inventory_screen.dart';
 import '../pos/screens/pos_screen.dart';
@@ -17,6 +18,7 @@ class _AppShellState extends State<AppShell> {
   final _screens = const [
     PosScreen(),
     InventoryScreen(),
+    CustomersScreen(),
     DailyZReportScreen(),
     DiagnosticsScreen(),
   ];
@@ -71,6 +73,11 @@ class _AppShellState extends State<AppShell> {
                       label: Text('Inventory'),
                     ),
                     NavigationRailDestination(
+                      icon: Icon(Icons.people_outline),
+                      selectedIcon: Icon(Icons.people),
+                      label: Text('Customers'),
+                    ),
+                    NavigationRailDestination(
                       icon: Icon(Icons.receipt_long_outlined),
                       selectedIcon: Icon(Icons.receipt_long),
                       label: Text('Z-Report'),
@@ -114,6 +121,11 @@ class _AppShellState extends State<AppShell> {
                   icon: Icon(Icons.inventory_2_outlined, color: Color(0xFF94A3B8)),
                   selectedIcon: Icon(Icons.inventory_2, color: Color(0xFF60A5FA)),
                   label: 'Inventory',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.people_outline, color: Color(0xFF94A3B8)),
+                  selectedIcon: Icon(Icons.people, color: Color(0xFF60A5FA)),
+                  label: 'Customers',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.receipt_long_outlined, color: Color(0xFF94A3B8)),

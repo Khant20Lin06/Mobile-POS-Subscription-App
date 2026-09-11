@@ -38,6 +38,10 @@ final customersStreamProvider = StreamProvider<List<Customer>>((ref) {
   return ref.watch(customerDaoProvider).watchCustomers();
 });
 
+final customerHistoryStreamProvider = StreamProvider.autoDispose.family<List<CustomerLedger>, String>((ref, customerId) {
+  return ref.watch(customerDaoProvider).watchCustomerHistory(customerId);
+});
+
 final allInventoryProductsStreamProvider = StreamProvider<List<Product>>((ref) {
   return ref.watch(productDaoProvider).watchAllInventoryProducts();
 });

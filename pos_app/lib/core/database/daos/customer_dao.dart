@@ -17,6 +17,14 @@ class CustomerDao extends DatabaseAccessor<AppDatabase> with _$CustomerDaoMixin 
         .watch();
   }
 
+  /// Alias for watchCustomers
+  Stream<List<Customer>> watchAllActiveCustomers() => watchCustomers();
+
+  /// Retrieve single customer by ID
+  Future<Customer?> getCustomerById(String id) {
+    return (select(customers)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+  }
+
   /// Insert a new customer
   Future<int> insertCustomer(CustomersCompanion entry) {
     return into(customers).insert(entry);
@@ -38,7 +46,7 @@ class CustomerDao extends DatabaseAccessor<AppDatabase> with _$CustomerDaoMixin 
         if (ledgerEntry.type.value == 'DEBT_INCREASE') {
           newDebt += ledgerEntry.amount.value;
         } else if (ledgerEntry.type.value == 'PAYMENT') {
-          newDebt -= ledgerEntry.amount.value;
+          newDebt = (newDebt - ledgerEntry.amount.value).clamp(0.0, 999999999.0);
         }
 
         await (update(customers)..where((t) => t.id.equals(customer.id))).write(
@@ -57,6 +65,40 @@ class CustomerDao extends DatabaseAccessor<AppDatabase> with _$CustomerDaoMixin 
     return (select(customerLedgers)
           ..where((tbl) => tbl.customerId.equals(customerId) & tbl.deletedAt.isNull())
           ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+        .get();
+  }
+
+  /// Watch live ledger history stream for a specific customer
+  Stream<List<CustomerLedger>> watchCustomerHistory(String customerId) {
+    return (select(customerLedgers)
+          ..where((tbl) => tbl.customerId.equals(customerId) & tbl.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+        .watch();
+  }
+
+  /// Update an existing customer profile
+  Future<bool> updateCustomer(CustomersCompanion entry) {
+    return update(customers).replace(entry);
+  }
+
+  /// Soft delete a customer
+  Future<int> softDeleteCustomer(String id) {
+    final now = DateTime.now().toUtc();
+    return (update(customers)..where((t) => t.id.equals(id))).write(
+      CustomersCompanion(
+        deletedAt: Value(now),
+        updatedAt: Value(now),
+        syncStatus: const Value('pending'),
+      ),
+    );
+  }
+
+  /// Search customer by name or phone
+  Future<List<Customer>> searchCustomers(String query) {
+    return (select(customers)
+          ..where((tbl) =>
+              tbl.deletedAt.isNull() &
+              (tbl.name.contains(query) | (tbl.phone.isNotNull() & tbl.phone.contains(query)))))
         .get();
   }
 }
