@@ -89,3 +89,10 @@
 ### C. Windows Desktop
 1. `DOT-POS-Windows-x64-v1.0.0.zip` ကို Right Click နှိပ်ပြီး **Extract All** ပြုလုပ်ပါ။
 2. ဖိုဒါထဲရှိ `pos_app.exe` ကို Double Click နှိပ်၍ ချက်ချင်း အသုံးပြုနိုင်ပါသည်။ (Desktop Shortcut ပြုလုပ်ထားနိုင်ပါသည်)
+
+### D. iOS `.ipa` Download (via GitHub Actions)
+1. GitHub Repository သို့ သွားရောက်ပါ (`https://github.com/Khant20Lin06/Mobile-POS-Subscription-App`)။
+2. အပေါ်ဘက် menu ရှိ **Actions** tab ကို နှိပ်ပါ။
+3. **Build iOS IPA** workflow ကို ရွေးချယ်ပြီး နောက်ဆုံးပြီးစီးသွားသော Run ကို နှိပ်ပါ။
+4. အောက်ခြေရှိ **Artifacts** ကဏ္ဍတွင် **`DOT-POS-iOS-v1.0.0-ipa`** ကို တိုက်ရိုက် Click နှိပ်၍ ဒေါင်းလုဒ်ဆွဲနိုင်ပါသည်။
+5. ရရှိလာသော `.ipa` ဖိုင်ကို AltStore, Sideloadly, 3uTools သို့မဟုတ် Apple TestFlight / Diawi စသည်တို့ဖြင့် iPhone / iPad များတွင် ထည့်သွင်း အသုံးပြုနိုင်ပါသည်။

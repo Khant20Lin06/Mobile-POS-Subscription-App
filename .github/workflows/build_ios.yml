@@ -1,0 +1,58 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pos_app/**'
+      - '.github/workflows/build_ios.yml'
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build iOS (.ipa)
+    runs-on: macos-14
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Flutter & Xcode Environment
+        run: |
+          flutter --version
+          xcodebuild -version
+          pod --version
+
+      - name: Install Flutter Dependencies
+        working-directory: pos_app
+        run: flutter pub get
+
+      - name: Build iOS App (Release, No CodeSign)
+        working-directory: pos_app
+        run: |
+          flutter build ios --release --no-codesign
+
+      - name: Package iOS App into .ipa
+        run: |
+          cd pos_app/build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          zip -r -q DOT-POS-v1.0.0.ipa Payload
+          ls -la DOT-POS-v1.0.0.ipa
+          echo "IPA Size: $(du -sh DOT-POS-v1.0.0.ipa | cut -f1)"
+
+      - name: Upload iOS IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DOT-POS-iOS-v1.0.0-ipa
+          path: pos_app/build/ios/iphoneos/DOT-POS-v1.0.0.ipa
+          if-no-files-found: error
+          retention-days: 30
