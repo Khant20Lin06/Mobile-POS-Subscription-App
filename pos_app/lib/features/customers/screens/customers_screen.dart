@@ -115,7 +115,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             child: ElevatedButton.icon(
               onPressed: () => CustomerFormDialog.show(context),
               icon: const Icon(Icons.person_add_alt, size: 16),
-              label: const Text('+ Customer', style: TextStyle(fontSize: 12)),
+              label: const Text('Customer', style: TextStyle(fontSize: 12)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
                 foregroundColor: Colors.white,

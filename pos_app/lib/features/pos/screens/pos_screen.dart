@@ -523,13 +523,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 builder: (context, gridConstraints) {
                   // Dynamic column count and compact aspect ratio based on available catalog width
                   int crossAxisCount = 2;
-                  double childAspectRatio = 1.05;
+                  double childAspectRatio = 1.28;
                   if (gridConstraints.maxWidth > 800) {
                     crossAxisCount = 4;
-                    childAspectRatio = 1.05;
+                    childAspectRatio = 1.22;
                   } else if (gridConstraints.maxWidth > 500) {
                     crossAxisCount = 3;
-                    childAspectRatio = 1.05;
+                    childAspectRatio = 1.24;
                   }
 
                   return GridView.builder(
@@ -686,7 +686,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   ProductImageWidget(
                     imageUrl: product.imageUrl,
                     width: double.infinity,
-                    height: 95,
+                    height: 86,
                     fit: BoxFit.cover,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   ),
@@ -730,7 +730,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
               // Product Details (Compact & tight, zero huge empty gap!)
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -740,19 +740,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 11.5,
                         height: 1.15,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
                       '${_currencyFormat.format(product.sellingPrice)} MMK',
                       style: const TextStyle(
                         color: Color(0xFF10B981),
                         fontWeight: FontWeight.bold,
-                        fontSize: 12.5,
+                        fontSize: 12,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

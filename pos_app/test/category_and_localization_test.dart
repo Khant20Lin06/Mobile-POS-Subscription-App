@@ -15,8 +15,8 @@ void main() {
       expect(container.read(appLanguageProvider), equals(AppLanguage.my));
 
       // Check key translations
-      expect(AppTranslations.tr('nav_register', AppLanguage.en), equals('Register'));
-      expect(AppTranslations.tr('nav_register', AppLanguage.my), equals('အရောင်း'));
+      expect(AppTranslations.tr('nav_register', AppLanguage.en), equals('POS'));
+      expect(AppTranslations.tr('nav_register', AppLanguage.my), equals('POS'));
 
       expect(AppTranslations.tr('nav_inventory', AppLanguage.en), equals('Inventory'));
       expect(AppTranslations.tr('nav_inventory', AppLanguage.my), equals('စတော့'));

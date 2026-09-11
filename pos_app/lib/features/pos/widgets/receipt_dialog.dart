@@ -41,12 +41,16 @@ class ReceiptDialog extends StatelessWidget {
         (receipt != null ? ThermalReceiptFormatter.format58mm(receipt!) : '');
     final displayTitle = title ?? (receipt != null ? 'Order Completed!' : 'Receipt Preview');
     final slipRef = orderNumber ?? receipt?.orderNumber ?? 'Slip';
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 420),
+        constraints: BoxConstraints(
+          maxWidth: 400,
+          maxHeight: screenHeight * 0.88,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(16),
@@ -63,58 +67,68 @@ class ReceiptDialog extends StatelessWidget {
           children: [
             // Dialog Header
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: const BoxDecoration(
                 color: Color(0xFF0F172A),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 22),
-                  const SizedBox(width: 10),
-                  Text(
-                    displayTitle,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      displayTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.close, color: Color(0xFF94A3B8), size: 20),
+                    icon: const Icon(Icons.close, color: Color(0xFF94A3B8), size: 18),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
             ),
 
-            // Realistic Thermal Paper Slip Container
+            // Realistic Thermal Paper Slip Container (Fitted & Responsive)
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFFBEB), // Warm white thermal paper tint
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      width: 320,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFBEB), // Warm thermal paper tint
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.18),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: SelectableText(
-                    formattedText.trim(),
-                    style: const TextStyle(
-                      fontFamily: 'Courier',
-                      fontSize: 13,
-                      height: 1.35,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B), // Dark thermal ink color
+                      child: SelectableText(
+                        formattedText.trim(),
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontFamilyFallback: ['Courier', 'Consolas', 'Courier New'],
+                          fontSize: 11.5,
+                          height: 1.35,
+                          letterSpacing: 0.1,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E293B), // Dark thermal ink color
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -123,30 +137,35 @@ class ReceiptDialog extends StatelessWidget {
 
             // Action Buttons Footer
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: const BoxDecoration(
                 color: Color(0xFF0F172A),
                 borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
               child: Row(
                 children: [
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF94A3B8),
-                      side: const BorderSide(color: Color(0xFF334155)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    ),
-                    icon: const Icon(Icons.copy, size: 16),
-                    label: const Text('Copy Slip'),
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: formattedText));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Receipt copied to clipboard!')),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
+                    flex: 2,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF94A3B8),
+                        side: const BorderSide(color: Color(0xFF334155)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.copy, size: 15),
+                      label: const Text('Copy', style: TextStyle(fontSize: 12)),
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: formattedText));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Receipt copied to clipboard!')),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 3,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2563EB),
@@ -154,10 +173,9 @@ class ReceiptDialog extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
-                      icon: const Icon(Icons.print, size: 18),
-                      label: const Text('Print Thermal Slip'),
+                      icon: const Icon(Icons.print, size: 17),
+                      label: const Text('Print Slip', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       onPressed: () {
-                        // Print action dispatched
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             backgroundColor: const Color(0xFF10B981),
@@ -165,7 +183,7 @@ class ReceiptDialog extends StatelessWidget {
                               children: [
                                 const Icon(Icons.print, color: Colors.white),
                                 const SizedBox(width: 10),
-                                Text('Printed $slipRef to Thermal Printer!'),
+                                Expanded(child: Text('Printed $slipRef to Thermal Printer!')),
                               ],
                             ),
                           ),

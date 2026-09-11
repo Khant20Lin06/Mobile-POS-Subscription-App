@@ -25,80 +25,90 @@ class PlanShowcaseDialog extends ConsumerWidget {
     final isPro = currentTier == 'pro';
     final isCustom = currentTier == 'custom';
 
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Dialog(
       backgroundColor: const Color(0xFF0F172A),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: 850,
-        constraints: const BoxConstraints(maxHeight: 680),
-        padding: const EdgeInsets.all(24),
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
+        padding: const EdgeInsets.all(18),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Top Header
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.stars, color: Color(0xFFF59E0B), size: 28),
+                  child: const Icon(Icons.stars, color: Color(0xFFF59E0B), size: 24),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         lang == AppLanguage.my ? 'DOT POS အစီအစဉ်များနှင့် ဈေးနှုန်းများ' : 'DOT POS Subscription Plans',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         lang == AppLanguage.my
-                            ? 'သင့်လုပ်ငန်းအရွယ်အစားနှင့် ကိုက်ညီသော စနစ်ကို ရွေးချယ်အသုံးပြုပါ'
+                            ? 'သင့်လုပ်ငန်းအရွယ်အစားနှင့် ကိုက်ညီသော စနစ်ကို ရွေးချယ်ပါ'
                             : 'Choose the best plan tailored for your store operations',
-                        style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                        style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
                       ),
                     ],
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Color(0xFF94A3B8)),
+                  icon: const Icon(Icons.close, color: Color(0xFF94A3B8), size: 20),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             // 3-Tier Comparison Cards
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final isSmall = constraints.maxWidth < 650;
+                  final isSmall = constraints.maxWidth < 680;
 
                   if (isSmall) {
-                    return ListView(
-                      children: [
-                        _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom),
-                        const SizedBox(height: 16),
-                        _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? ''),
-                        const SizedBox(height: 16),
-                        _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? ''),
-                      ],
+                    return SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom),
+                          const SizedBox(height: 14),
+                          _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? ''),
+                          const SizedBox(height: 14),
+                          _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? ''),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
                     );
                   }
 
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(child: _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom)),
-                      const SizedBox(width: 16),
-                      Expanded(child: _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? '')),
-                      const SizedBox(width: 16),
-                      Expanded(child: _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? '')),
-                    ],
+                  return SingleChildScrollView(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom)),
+                        const SizedBox(width: 14),
+                        Expanded(child: _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? '')),
+                        const SizedBox(width: 14),
+                        Expanded(child: _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? '')),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -111,7 +121,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
 
   Widget _buildFreeCard(BuildContext context, WidgetRef ref, AppLanguage lang, {required bool isCurrent}) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(16),
@@ -122,13 +132,14 @@ class PlanShowcaseDialog extends ConsumerWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 'FREE PLAN',
-                style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 15),
               ),
               if (isCurrent)
                 Container(
@@ -145,33 +156,26 @@ class PlanShowcaseDialog extends ConsumerWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             AppTranslations.tr('plan_free_price', lang),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             lang == AppLanguage.my
                 ? 'ဆိုင်တစ်ဆိုင်တည်း အင်တာနက်မလိုဘဲ အော့ဖ်လိုင်းသုံးရန် အထူးသင့်လျော်ပါသည်'
                 : '100% offline standalone POS for single shop',
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
-          const Divider(color: Color(0xFF334155), height: 24),
-          Expanded(
-            child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildFeatureItem(lang == AppLanguage.my ? '100% Offline SQLite ACID စနစ်' : '100% Offline SQLite ACID Ready'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'အရောင်းနှင့် ဘောက်ချာ အကန့်အသတ်မရှိ' : 'Unlimited Orders & Invoices'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'စတော့စာရင်းနှင့် အဝင်/အထွက်' : 'Product & Stock Management'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'ဖောက်သည် & အကြွေးစာရင်း' : 'Customer CRM & Debt Repayment'),
-                _buildFeatureItem(lang == AppLanguage.my ? '58mm / 80mm Thermal Receipt Print' : '58mm/80mm Thermal Receipts'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'ကက်ရှာ PIN နှင့် အဆိုင်းစစ်ဆေးခြင်း' : 'Cashier PIN & Shift Drawers'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် Z-Report စာရင်းချုပ်' : 'Daily Z-Report & Audit Slip'),
-              ],
-            ),
-          ),
+          const Divider(color: Color(0xFF334155), height: 20),
+          _buildFeatureItem(lang == AppLanguage.my ? '100% Offline SQLite ACID စနစ်' : '100% Offline SQLite ACID Ready'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'အရောင်းနှင့် ဘောက်ချာ အကန့်အသတ်မရှိ' : 'Unlimited Orders & Invoices'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'စတော့စာရင်းနှင့် အဝင်/အထွက်' : 'Product & Stock Management'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'ဖောက်သည် & အကြွေးစာရင်း' : 'Customer CRM & Debt Repayment'),
+          _buildFeatureItem(lang == AppLanguage.my ? '58mm / 80mm Thermal Receipt Print' : '58mm/80mm Thermal Receipts'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'ကက်ရှာ PIN နှင့် အဆိုင်းစစ်ဆေးခြင်း' : 'Cashier PIN & Shift Drawers'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် Z-Report စာရင်းချုပ်' : 'Daily Z-Report & Audit Slip'),
         ],
       ),
     );
@@ -179,7 +183,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
 
   Widget _buildProCard(BuildContext context, WidgetRef ref, AppLanguage lang, {required bool isCurrent, required String shopId}) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(16),
@@ -190,13 +194,14 @@ class PlanShowcaseDialog extends ConsumerWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'PRO PLAN',
-                style: TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -214,33 +219,26 @@ class PlanShowcaseDialog extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             AppTranslations.tr('plan_pro_price', lang),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             lang == AppLanguage.my
                 ? 'ဖုန်းနှင့် Tablet စက်များစွာ ချိတ်ဆက်ပြီး Cloud Delta Sync သုံးလိုသူများအတွက်'
                 : 'Real-time multi-device cloud delta sync & backup',
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
-          const Divider(color: Color(0xFF334155), height: 24),
-          Expanded(
-            child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildFeatureItem(lang == AppLanguage.my ? 'FREE စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in FREE plan, plus:'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'Real-time Cloud Delta Sync' : 'Real-time Cloud Delta Sync'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'ဖုန်း/Tablet စက်များစွာ ချိတ်ဆက်ရောင်းနိုင်ခြင်း' : 'Multi-device Live Syncing'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် အလိုအလျောက် Cloud Backup' : 'Daily Automated Cloud Backup'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'အဝေးရောက် Web Dashboard ကြည့်ရှုခွင့်' : 'Remote Web Dashboard Access'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'Telegram Priority အကူအညီ' : 'Priority WhatsApp/Telegram Support'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
+          const Divider(color: Color(0xFF334155), height: 20),
+          _buildFeatureItem(lang == AppLanguage.my ? 'FREE စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in FREE plan, plus:'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Real-time Cloud Delta Sync' : 'Real-time Cloud Delta Sync'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'ဖုန်း/Tablet စက်များစွာ ချိတ်ဆက်ရောင်းနိုင်ခြင်း' : 'Multi-device Live Syncing'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် အလိုအလျောက် Cloud Backup' : 'Daily Automated Cloud Backup'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'အဝေးရောက် Web Dashboard ကြည့်ရှုခွင့်' : 'Remote Web Dashboard Access'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Telegram Priority အကူအညီ' : 'Priority Support via Telegram'),
+          const SizedBox(height: 12),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF59E0B),
@@ -279,7 +277,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
 
   Widget _buildCustomCard(BuildContext context, WidgetRef ref, AppLanguage lang, {required bool isCurrent, required String shopId}) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(16),
@@ -290,13 +288,14 @@ class PlanShowcaseDialog extends ConsumerWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 'CUSTOM PLAN',
-                style: TextStyle(color: Color(0xFFA855F7), fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(color: Color(0xFFA855F7), fontWeight: FontWeight.bold, fontSize: 15),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -312,34 +311,27 @@ class PlanShowcaseDialog extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             AppTranslations.tr('plan_custom_price', lang),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             lang == AppLanguage.my
                 ? 'ဆိုင်ခွဲများစွာ၊ ဗဟိုဂိုဒေါင်နှင့် စိတ်ကြိုက် ERP ချိတ်ဆက်လိုသော လုပ်ငန်းကြီးများအတွက်'
                 : 'Multi-branch retail chains & custom ERP integrations',
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
-          const Divider(color: Color(0xFF334155), height: 24),
-          Expanded(
-            child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildFeatureItem(lang == AppLanguage.my ? 'PRO စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in PRO plan, plus:'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'ဆိုင်ခွဲအကန့်အသတ်မရှိ ကွင်းဆက်စနစ်' : 'Unlimited Store Chains & Branches'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'ဗဟိုဂိုဒေါင် & ဆိုင်ခွဲများ အပြန်အလှန် လွှဲပြောင်း' : 'Central Warehouse Stock Transfer'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် ERP / Accounting API Integration' : 'Custom ERP / API Integration'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် ဘောက်ချာဒီဇိုင်း & Logo အမှတ်တံဆိပ်' : 'Custom Thermal Receipt Branding'),
-                _buildFeatureItem(lang == AppLanguage.my ? 'သီးသန့် Database & Server Hosting' : 'Dedicated Database & Server'),
-                _buildFeatureItem(lang == AppLanguage.my ? '၂၄/၇ ဖုန်း & On-site အထူးဝန်ဆောင်မှု' : '24/7 Dedicated Support Agent'),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
+          const Divider(color: Color(0xFF334155), height: 20),
+          _buildFeatureItem(lang == AppLanguage.my ? 'PRO စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in PRO plan, plus:'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'ဆိုင်ခွဲအကန့်အသတ်မရှိ ကွင်းဆက်စနစ်' : 'Unlimited Store Chains & Branches'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'ဗဟိုဂိုဒေါင် & ဆိုင်ခွဲများ အပြန်အလှန် လွှဲပြောင်း' : 'Central Warehouse Stock Transfer'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် ERP / Accounting API Integration' : 'Custom ERP / API Integration'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် ဘောက်ချာဒီဇိုင်း & Logo အမှတ်တံဆိပ်' : 'Custom Thermal Receipt Branding'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'သီးသန့် Database & Server Hosting' : 'Dedicated Database & Server'),
+          _buildFeatureItem(lang == AppLanguage.my ? '၂၄/၇ ဖုန်း & On-site အထူးဝန်ဆောင်မှု' : '24/7 Dedicated Support Agent'),
+          const SizedBox(height: 12),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF9333EA),
@@ -361,7 +353,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
 
   Widget _buildFeatureItem(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -370,7 +362,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 12, height: 1.2),
+              style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 11.5, height: 1.2),
             ),
           ),
         ],

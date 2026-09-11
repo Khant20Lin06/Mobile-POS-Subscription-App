@@ -11,6 +11,8 @@ import '../../auth/widgets/pin_login_dialog.dart';
 import '../../auth/widgets/staff_management_dialog.dart';
 import '../../auth/widgets/admin_override_dialog.dart';
 import '../../../core/database/seeder.dart';
+import '../widgets/shop_profile_dialog.dart';
+import '../widgets/printer_settings_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -274,9 +276,58 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 _buildInfoRow(lang == AppLanguage.my ? 'ဆိုင်အမည်' : 'Shop Name', shop?.name ?? 'DOT POS Store'),
                 const Divider(color: Color(0xFF334155), height: 16),
-                _buildInfoRow(lang == AppLanguage.my ? 'အသုံးပြုငွေကြေး' : 'Currency', '${shop?.currency ?? "MMK"} (Myanmar Kyats)'),
+                _buildInfoRow(lang == AppLanguage.my ? 'ဖုန်းနံပါတ်' : 'Phone', shop?.phone ?? '09-770001122'),
                 const Divider(color: Color(0xFF334155), height: 16),
-                _buildInfoRow(lang == AppLanguage.my ? 'ဘောက်ချာ ပရင်တာ' : 'Printer Width', '58mm / 80mm ESC/POS Thermal'),
+                _buildInfoRow(lang == AppLanguage.my ? 'ဆိုင်လိပ်စာ' : 'Address', shop?.address ?? 'No. 123, Bogyoke Road, Yangon'),
+                const Divider(color: Color(0xFF334155), height: 16),
+                _buildInfoRow(lang == AppLanguage.my ? 'အသုံးပြုငွေကြေး' : 'Currency', '${shop?.currency ?? "MMK"} (Myanmar Kyats)'),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFA855F7),
+                    side: const BorderSide(color: Color(0xFFA855F7)),
+                    minimumSize: const Size(double.infinity, 38),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: Text(
+                    lang == AppLanguage.my ? 'ဆိုင်အချက်အလက် ပြင်ဆင်မည်' : 'Edit Shop Profile',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  onPressed: shop == null ? null : () => ShopProfileDialog.show(context, shop),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 5. Thermal Printer Setup Card
+          _buildCard(
+            title: AppTranslations.tr('set_printer', lang),
+            icon: Icons.print,
+            iconColor: const Color(0xFF38BDF8),
+            child: Column(
+              children: [
+                _buildInfoRow(lang == AppLanguage.my ? 'ပရင်တာ အခြေအနေ' : 'Printer Status', 'Ready (ESC/POS)'),
+                const Divider(color: Color(0xFF334155), height: 16),
+                _buildInfoRow(lang == AppLanguage.my ? 'ချိတ်ဆက်မှု စနစ်' : 'Interface', 'Bluetooth / WiFi / USB'),
+                const Divider(color: Color(0xFF334155), height: 16),
+                _buildInfoRow(lang == AppLanguage.my ? 'ဘောက်ချာ အရွယ်အစား' : 'Paper Size', '58mm / 80mm Thermal'),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF38BDF8),
+                    side: const BorderSide(color: Color(0xFF38BDF8)),
+                    minimumSize: const Size(double.infinity, 38),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.settings, size: 16),
+                  label: Text(
+                    lang == AppLanguage.my ? 'ပရင်တာ ချိတ်ဆက်မှု ဆက်တင် / Test Print' : 'Configure Printer & Test Print',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  onPressed: () => PrinterSettingsDialog.show(context),
+                ),
               ],
             ),
           ),

@@ -134,7 +134,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             child: ElevatedButton.icon(
               onPressed: () => _openProductForm(),
               icon: const Icon(Icons.add, size: 16),
-              label: const Text('+ Product', style: TextStyle(fontSize: 12)),
+              label: const Text('Product', style: TextStyle(fontSize: 12)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
                 foregroundColor: Colors.white,

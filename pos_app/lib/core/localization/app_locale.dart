@@ -34,10 +34,10 @@ final appLanguageProvider = StateNotifierProvider<AppLanguageNotifier, AppLangua
 class AppTranslations {
   static const Map<String, Map<String, String>> _localizedValues = {
     // Navigation
-    'nav_register': {'en': 'Register', 'my': 'အရောင်း'},
+    'nav_register': {'en': 'POS', 'my': 'POS'},
     'nav_inventory': {'en': 'Inventory', 'my': 'စတော့'},
     'nav_customers': {'en': 'Customers', 'my': 'ဖောက်သည်'},
-    'nav_zreport': {'en': 'Z-Report', 'my': 'ဇက်-အစီရင်ခံစာ'},
+    'nav_zreport': {'en': 'Report', 'my': 'အစီရင်ခံစာ'},
     'nav_settings': {'en': 'Settings', 'my': 'ဆက်တင်များ'},
     'nav_dbsync': {'en': 'DB & Sync', 'my': 'ဒေတာ & ဆင့်ခ်'},
 
