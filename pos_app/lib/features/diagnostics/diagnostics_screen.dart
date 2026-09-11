@@ -8,7 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/database/app_database.dart';
 import '../../core/database/seeder.dart';
 import '../../core/providers/database_provider.dart';
-import '../subscription/widgets/activation_dialog.dart';
+import '../subscription/widgets/plan_showcase_dialog.dart';
 
 class DiagnosticsScreen extends ConsumerStatefulWidget {
   const DiagnosticsScreen({super.key});
@@ -93,47 +93,51 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen>
               final screenWidth = MediaQuery.of(context).size.width;
               final isSmall = screenWidth < 500;
 
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isPro
-                      ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
-                      : const Color(0xFF10B981).withValues(alpha: 0.15),
-                  border: Border.all(
-                    color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isPro ? Icons.stars : Icons.wifi_off,
+              return InkWell(
+                onTap: () => PlanShowcaseDialog.show(context),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isPro
+                        ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
+                        : const Color(0xFF10B981).withValues(alpha: 0.15),
+                    border: Border.all(
                       color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                      size: 14,
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      isSmall
-                          ? (isPro ? 'PRO' : 'FREE')
-                          : (isPro ? '${shop?.planTier.toUpperCase()} (Cloud Active)' : 'FREE (Offline Mode)'),
-                      style: TextStyle(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isPro ? Icons.stars : Icons.wifi_off,
                         color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
+                        size: 14,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        isSmall
+                            ? (isPro ? 'PRO' : 'FREE')
+                            : (isPro ? '${shop?.planTier.toUpperCase()} (Cloud Active)' : 'FREE (Offline Mode)'),
+                        style: TextStyle(
+                          color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
           ),
-          // Upgrade Button (Telegram Link simulation)
+          // Upgrade Button (Opens Plan Showcase)
           IconButton(
-            tooltip: 'Upgrade / Manage License',
+            tooltip: 'View Subscription Plans',
             icon: const Icon(Icons.workspace_premium, color: Color(0xFFF59E0B), size: 22),
-            onPressed: () => _showUpgradeDialog(context),
+            onPressed: () => PlanShowcaseDialog.show(context),
           ),
           const SizedBox(width: 4),
         ],
@@ -848,14 +852,6 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen>
           ),
         ],
       ),
-    );
-  }
-
-  // Telegram Upgrade / Activation Modal
-  void _showUpgradeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => const ActivationDialog(),
     );
   }
 }

@@ -4,10 +4,11 @@ import '../auth/providers/auth_provider.dart';
 import '../auth/widgets/admin_override_dialog.dart';
 import '../auth/widgets/pin_login_dialog.dart';
 import '../customers/screens/customers_screen.dart';
-import '../diagnostics/diagnostics_screen.dart';
+import '../settings/screens/settings_screen.dart';
 import '../inventory/screens/inventory_screen.dart';
 import '../pos/screens/pos_screen.dart';
 import '../reports/screens/daily_z_report_screen.dart';
+import '../../core/localization/app_locale.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
@@ -24,17 +25,17 @@ class _AppShellState extends ConsumerState<AppShell> {
     InventoryScreen(),
     CustomersScreen(),
     DailyZReportScreen(),
-    DiagnosticsScreen(),
+    SettingsScreen(),
   ];
 
   void _onDestinationSelected(int idx) async {
     final activeUser = ref.read(currentUserProvider);
 
-    // If cashier attempts to access Z-Report (3) or DB & Sync (4)
+    // If cashier attempts to access Z-Report (3) or Settings (4)
     if (activeUser?.role == 'cashier' && (idx == 3 || idx == 4)) {
       final approved = await AdminOverrideDialog.requestApproval(
         context,
-        actionTitle: idx == 3 ? 'View Daily Z-Report' : 'Access Database & Sync Settings',
+        actionTitle: idx == 3 ? 'View Daily Z-Report' : 'Access Settings & Management',
       );
       if (!approved) return;
     }
@@ -45,6 +46,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   Widget build(BuildContext context) {
     final isLocked = ref.watch(isTerminalLockedProvider);
+    final lang = ref.watch(appLanguageProvider);
 
     Widget content = LayoutBuilder(
       builder: (context, constraints) {
@@ -82,31 +84,31 @@ class _AppShellState extends ConsumerState<AppShell> {
                       child: const Icon(Icons.point_of_sale, color: Colors.white, size: 22),
                     ),
                   ),
-                  destinations: const [
+                  destinations: [
                     NavigationRailDestination(
-                      icon: Icon(Icons.point_of_sale_outlined),
-                      selectedIcon: Icon(Icons.point_of_sale),
-                      label: Text('POS Sales'),
+                      icon: const Icon(Icons.point_of_sale_outlined),
+                      selectedIcon: const Icon(Icons.point_of_sale),
+                      label: Text(AppTranslations.tr('nav_register', lang)),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.inventory_2_outlined),
-                      selectedIcon: Icon(Icons.inventory_2),
-                      label: Text('Inventory'),
+                      icon: const Icon(Icons.inventory_2_outlined),
+                      selectedIcon: const Icon(Icons.inventory_2),
+                      label: Text(AppTranslations.tr('nav_inventory', lang)),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.people_outline),
-                      selectedIcon: Icon(Icons.people),
-                      label: Text('Customers'),
+                      icon: const Icon(Icons.people_outline),
+                      selectedIcon: const Icon(Icons.people),
+                      label: Text(AppTranslations.tr('nav_customers', lang)),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.receipt_long_outlined),
-                      selectedIcon: Icon(Icons.receipt_long),
-                      label: Text('Z-Report'),
+                      icon: const Icon(Icons.receipt_long_outlined),
+                      selectedIcon: const Icon(Icons.receipt_long),
+                      label: Text(AppTranslations.tr('nav_zreport', lang)),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.storage_outlined),
-                      selectedIcon: Icon(Icons.storage),
-                      label: Text('DB & Sync'),
+                      icon: const Icon(Icons.settings_outlined),
+                      selectedIcon: const Icon(Icons.settings),
+                      label: Text(AppTranslations.tr('nav_settings', lang)),
                     ),
                   ],
                 ),
@@ -132,31 +134,31 @@ class _AppShellState extends ConsumerState<AppShell> {
               indicatorColor: const Color(0xFF2563EB).withValues(alpha: 0.3),
               selectedIndex: _currentIndex,
               onDestinationSelected: _onDestinationSelected,
-              destinations: const [
+              destinations: [
                 NavigationDestination(
-                  icon: Icon(Icons.point_of_sale_outlined, color: Color(0xFF94A3B8)),
-                  selectedIcon: Icon(Icons.point_of_sale, color: Color(0xFF60A5FA)),
-                  label: 'Register',
+                  icon: const Icon(Icons.point_of_sale_outlined, color: Color(0xFF94A3B8)),
+                  selectedIcon: const Icon(Icons.point_of_sale, color: Color(0xFF60A5FA)),
+                  label: AppTranslations.tr('nav_register', lang),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.inventory_2_outlined, color: Color(0xFF94A3B8)),
-                  selectedIcon: Icon(Icons.inventory_2, color: Color(0xFF60A5FA)),
-                  label: 'Inventory',
+                  icon: const Icon(Icons.inventory_2_outlined, color: Color(0xFF94A3B8)),
+                  selectedIcon: const Icon(Icons.inventory_2, color: Color(0xFF60A5FA)),
+                  label: AppTranslations.tr('nav_inventory', lang),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.people_outline, color: Color(0xFF94A3B8)),
-                  selectedIcon: Icon(Icons.people, color: Color(0xFF60A5FA)),
-                  label: 'Customers',
+                  icon: const Icon(Icons.people_outline, color: Color(0xFF94A3B8)),
+                  selectedIcon: const Icon(Icons.people, color: Color(0xFF60A5FA)),
+                  label: AppTranslations.tr('nav_customers', lang),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.receipt_long_outlined, color: Color(0xFF94A3B8)),
-                  selectedIcon: Icon(Icons.receipt_long, color: Color(0xFF60A5FA)),
-                  label: 'Z-Report',
+                  icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF94A3B8)),
+                  selectedIcon: const Icon(Icons.receipt_long, color: Color(0xFF60A5FA)),
+                  label: AppTranslations.tr('nav_zreport', lang),
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.storage_outlined, color: Color(0xFF94A3B8)),
-                  selectedIcon: Icon(Icons.storage, color: Color(0xFF60A5FA)),
-                  label: 'DB & Sync',
+                  icon: const Icon(Icons.settings_outlined, color: Color(0xFF94A3B8)),
+                  selectedIcon: const Icon(Icons.settings, color: Color(0xFF60A5FA)),
+                  label: AppTranslations.tr('nav_settings', lang),
                 ),
               ],
             ),

@@ -7,6 +7,13 @@ import '../../../core/providers/database_provider.dart';
 class ActivationDialog extends ConsumerStatefulWidget {
   const ActivationDialog({super.key});
 
+  static Future<void> show(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (ctx) => const ActivationDialog(),
+    );
+  }
+
   @override
   ConsumerState<ActivationDialog> createState() => _ActivationDialogState();
 }

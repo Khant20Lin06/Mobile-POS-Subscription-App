@@ -132,4 +132,37 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
   Future<int> insertCategory(CategoriesCompanion entry) {
     return into(db.categories).insert(entry);
   }
+
+  /// Update existing category
+  Future<bool> updateCategory(CategoriesCompanion entry) {
+    return update(db.categories).replace(entry);
+  }
+
+  /// Soft delete category and safely unassign associated products
+  Future<int> softDeleteCategory(String id) async {
+    // Safely detach products from this category so they are not orphaned
+    await (update(products)..where((t) => t.categoryId.equals(id))).write(
+      const ProductsCompanion(
+        categoryId: Value(null),
+      ),
+    );
+
+    return (update(db.categories)..where((t) => t.id.equals(id))).write(
+      CategoriesCompanion(
+        deletedAt: Value(DateTime.now().toUtc()),
+        updatedAt: Value(DateTime.now().toUtc()),
+        syncStatus: const Value('pending'),
+      ),
+    );
+  }
+
+  /// Get product count for a given category
+  Future<int> getCategoryProductCount(String categoryId) async {
+    final countExp = products.id.count();
+    final query = selectOnly(products)
+      ..addColumns([countExp])
+      ..where(products.categoryId.equals(categoryId) & products.deletedAt.isNull());
+    final result = await query.getSingle();
+    return result.read(countExp) ?? 0;
+  }
 }

@@ -15,6 +15,9 @@ import '../../shifts/widgets/shift_drawer_dialog.dart';
 import '../../shifts/widgets/close_shift_dialog.dart';
 import '../widgets/receipt_dialog.dart';
 import '../../../core/widgets/product_image_widget.dart';
+import '../../../core/localization/app_locale.dart';
+import '../../subscription/widgets/plan_showcase_dialog.dart';
+import '../../inventory/widgets/category_management_dialog.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -153,36 +156,40 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               final shop = shopAsync.value;
               final isPro = shop?.planTier == 'pro' || shop?.planTier == 'custom';
 
-              return Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isPro
-                      ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
-                      : const Color(0xFF10B981).withValues(alpha: 0.15),
-                  border: Border.all(
-                    color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isPro ? Icons.stars : Icons.wifi_off,
+              return InkWell(
+                onTap: () => PlanShowcaseDialog.show(context),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: isPro
+                        ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
+                        : const Color(0xFF10B981).withValues(alpha: 0.15),
+                    border: Border.all(
                       color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                      size: 11,
                     ),
-                    const SizedBox(width: 3),
-                    Text(
-                      isPro ? 'PRO' : 'FREE',
-                      style: TextStyle(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isPro ? Icons.stars : Icons.wifi_off,
                         color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
+                        size: 11,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 3),
+                      Text(
+                        isPro ? 'PRO' : 'FREE',
+                        style: TextStyle(
+                          color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -514,15 +521,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
               return LayoutBuilder(
                 builder: (context, gridConstraints) {
-                  // Dynamic column count based on available catalog width
+                  // Dynamic column count and compact aspect ratio based on available catalog width
                   int crossAxisCount = 2;
-                  double childAspectRatio = 0.76;
-                  if (gridConstraints.maxWidth > 700) {
+                  double childAspectRatio = 1.05;
+                  if (gridConstraints.maxWidth > 800) {
                     crossAxisCount = 4;
-                    childAspectRatio = 0.85;
-                  } else if (gridConstraints.maxWidth > 480) {
+                    childAspectRatio = 1.05;
+                  } else if (gridConstraints.maxWidth > 500) {
                     crossAxisCount = 3;
-                    childAspectRatio = 0.82;
+                    childAspectRatio = 1.05;
                   }
 
                   return GridView.builder(
@@ -550,55 +557,101 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 
   Widget _buildCategoryPills() {
-    // Categories stream could be used, or fixed presets for immediate response
-    final categories = [
-      {'id': null, 'name': 'All Items', 'icon': Icons.apps},
-      {'id': 'cat_coffee', 'name': 'Coffee & Tea', 'icon': Icons.coffee},
-      {'id': 'cat_bakery', 'name': 'Bakery & Snacks', 'icon': Icons.bakery_dining},
-      {'id': 'cat_drinks', 'name': 'Cold Drinks', 'icon': Icons.local_drink},
-      {'id': 'cat_general', 'name': 'General Goods', 'icon': Icons.shopping_basket},
-    ];
+    final categoriesAsync = ref.watch(categoriesStreamProvider);
+    final lang = ref.watch(appLanguageProvider);
 
     return Container(
       height: 48,
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       color: const Color(0xFF1E293B),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final cat = categories[index];
-          final isSelected = _selectedCategoryId == cat['id'];
-
-          return FilterChip(
-            selected: isSelected,
-            showCheckmark: false,
-            avatar: Icon(
-              cat['icon'] as IconData,
-              size: 16,
-              color: isSelected ? Colors.white : const Color(0xFF94A3B8),
-            ),
-            label: Text(
-              cat['name'] as String,
-              style: TextStyle(
-                color: isSelected ? Colors.white : const Color(0xFF94A3B8),
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      child: categoriesAsync.when(
+        data: (categories) {
+          return ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              // 1. All Items Chip
+              FilterChip(
+                selected: _selectedCategoryId == null,
+                showCheckmark: false,
+                avatar: Icon(
+                  Icons.apps,
+                  size: 16,
+                  color: _selectedCategoryId == null ? Colors.white : const Color(0xFF94A3B8),
+                ),
+                label: Text(
+                  AppTranslations.tr('pos_all_items', lang),
+                  style: TextStyle(
+                    color: _selectedCategoryId == null ? Colors.white : const Color(0xFF94A3B8),
+                    fontSize: 12,
+                    fontWeight: _selectedCategoryId == null ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                backgroundColor: const Color(0xFF0F172A),
+                selectedColor: const Color(0xFF2563EB),
+                side: BorderSide(
+                  color: _selectedCategoryId == null ? const Color(0xFF3B82F6) : const Color(0xFF334155),
+                ),
+                onSelected: (_) => setState(() => _selectedCategoryId = null),
               ),
-            ),
-            backgroundColor: const Color(0xFF0F172A),
-            selectedColor: const Color(0xFF2563EB),
-            side: BorderSide(
-              color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFF334155),
-            ),
-            onSelected: (_) {
-              setState(() {
-                _selectedCategoryId = isSelected ? null : cat['id'] as String?;
-              });
-            },
+              const SizedBox(width: 8),
+
+              // Dynamic Category Chips from Database
+              ...categories.map((cat) {
+                final isSelected = _selectedCategoryId == cat.id;
+                Color catColor = const Color(0xFF3B82F6);
+                if (cat.colorCode != null && cat.colorCode!.startsWith('#')) {
+                  try {
+                    catColor = Color(int.parse(cat.colorCode!.replaceFirst('#', '0xFF')));
+                  } catch (_) {}
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    selected: isSelected,
+                    showCheckmark: false,
+                    avatar: CircleAvatar(
+                      radius: 6,
+                      backgroundColor: catColor,
+                    ),
+                    label: Text(
+                      cat.name,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    backgroundColor: const Color(0xFF0F172A),
+                    selectedColor: const Color(0xFF2563EB),
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFF334155),
+                    ),
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategoryId = isSelected ? null : cat.id;
+                      });
+                    },
+                  ),
+                );
+              }),
+
+              // Manage Categories Shortcut Chip
+              ActionChip(
+                avatar: const Icon(Icons.tune, size: 14, color: Color(0xFF38BDF8)),
+                label: Text(
+                  lang == AppLanguage.my ? '+ အမျိုးအစားများ' : '+ Manage',
+                  style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.w600),
+                ),
+                backgroundColor: const Color(0xFF0F172A),
+                side: const BorderSide(color: Color(0xFF38BDF8), width: 0.8),
+                onPressed: () => CategoryManagementDialog.show(context),
+              ),
+            ],
           );
         },
+        loading: () => const SizedBox.shrink(),
+        error: (err, stack) => const SizedBox.shrink(),
       ),
     );
   }
@@ -633,7 +686,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   ProductImageWidget(
                     imageUrl: product.imageUrl,
                     width: double.infinity,
-                    height: 80,
+                    height: 95,
                     fit: BoxFit.cover,
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   ),
@@ -675,37 +728,36 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 ],
               ),
 
-              // Product Details
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        product.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          height: 1.2,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+              // Product Details (Compact & tight, zero huge empty gap!)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        height: 1.15,
                       ),
-                      Text(
-                        '${_currencyFormat.format(product.sellingPrice)} MMK',
-                        style: const TextStyle(
-                          color: Color(0xFF10B981),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '${_currencyFormat.format(product.sellingPrice)} MMK',
+                      style: const TextStyle(
+                        color: Color(0xFF10B981),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.5,
                       ),
-                    ],
-                  ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ],

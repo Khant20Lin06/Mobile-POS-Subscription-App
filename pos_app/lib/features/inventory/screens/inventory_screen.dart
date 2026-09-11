@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/widgets/product_image_widget.dart';
-import '../widgets/category_form_dialog.dart';
+import '../widgets/category_management_dialog.dart';
 import '../widgets/product_form_dialog.dart';
 import '../widgets/stock_adjustment_dialog.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -119,11 +119,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ],
         ),
         actions: [
-          // Add Category Button
+          // Manage Categories Button
           IconButton.filledTonal(
-            tooltip: 'Add Category',
-            onPressed: () => CategoryFormDialog.show(context),
-            icon: const Icon(Icons.create_new_folder_outlined, size: 18, color: Color(0xFF38BDF8)),
+            tooltip: 'Manage Categories',
+            onPressed: () => CategoryManagementDialog.show(context),
+            icon: const Icon(Icons.tune, size: 18, color: Color(0xFF38BDF8)),
             style: IconButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
           ),
           const SizedBox(width: 6),

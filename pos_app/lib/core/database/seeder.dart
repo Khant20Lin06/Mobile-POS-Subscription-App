@@ -5,6 +5,9 @@ import 'app_database.dart';
 class DatabaseSeeder {
   static const _uuid = Uuid();
 
+  /// Seed demo data (calls seedIfEmpty)
+  static Future<void> seedInitialData(AppDatabase db) => seedIfEmpty(db);
+
   /// Seed demo data if the database is completely fresh
   static Future<void> seedIfEmpty(AppDatabase db) async {
     final existingShops = await db.select(db.shops).get();
