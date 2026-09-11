@@ -6,6 +6,7 @@ import '../database/daos/customer_dao.dart';
 import '../database/daos/user_dao.dart';
 import '../database/daos/shift_dao.dart';
 import '../sync/sync_service.dart';
+import '../backup/backup_service.dart';
 
 /// Singleton Database Provider
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -92,5 +93,11 @@ final pendingSyncCountProvider = FutureProvider.autoDispose<int>((ref) async {
 final syncServiceProvider = Provider<SyncService>((ref) {
   final db = ref.watch(databaseProvider);
   return SyncService(db: db);
+});
+
+/// Backup & Export Service Provider
+final backupServiceProvider = Provider<BackupService>((ref) {
+  final db = ref.watch(databaseProvider);
+  return BackupService(db);
 });
 

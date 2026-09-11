@@ -16,6 +16,7 @@ import '../../../core/database/seeder.dart';
 import '../widgets/shop_profile_dialog.dart';
 import '../widgets/printer_settings_dialog.dart';
 import '../widgets/scan_gun_settings_dialog.dart';
+import '../widgets/backup_restore_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -562,6 +563,42 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                     ),
                   ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 9. Excel & JSON Data Backup Card
+          _buildCard(
+            title: lang == AppLanguage.my ? 'ဒေတာ Backup & Excel ထုတ်ယူခြင်း' : 'Data Backup & Excel / JSON Export',
+            icon: Icons.backup_table,
+            iconColor: const Color(0xFF10B981),
+            child: Column(
+              children: [
+                _buildInfoRow(
+                  lang == AppLanguage.my ? 'Backup အမျိုးအစား' : 'Backup Formats',
+                  'Excel (CSV) & Full JSON',
+                ),
+                const Divider(color: Color(0xFF334155), height: 16),
+                _buildInfoRow(
+                  lang == AppLanguage.my ? 'လုံခြုံရေး အဆင့်' : 'Security & Storage',
+                  'Local Offline Storage (UTF-8 BOM)',
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF10B981),
+                    side: const BorderSide(color: Color(0xFF10B981)),
+                    minimumSize: const Size(double.infinity, 38),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.download_for_offline, size: 16),
+                  label: Text(
+                    lang == AppLanguage.my ? 'Excel / JSON Backup ထုတ်ယူ & ပြန်သွင်းမည်' : 'Manage Excel & JSON Backups',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  onPressed: () => BackupRestoreDialog.show(context),
                 ),
               ],
             ),

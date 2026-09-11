@@ -6,7 +6,7 @@ import '../../../core/providers/database_provider.dart';
 import '../../../core/localization/app_locale.dart';
 import 'activation_dialog.dart';
 
-class PlanShowcaseDialog extends ConsumerWidget {
+class PlanShowcaseDialog extends ConsumerStatefulWidget {
   const PlanShowcaseDialog({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -17,7 +17,20 @@ class PlanShowcaseDialog extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PlanShowcaseDialog> createState() => _PlanShowcaseDialogState();
+}
+
+class _PlanShowcaseDialogState extends ConsumerState<PlanShowcaseDialog> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final shopAsync = ref.watch(currentShopProvider);
     final lang = ref.watch(appLanguageProvider);
     final shop = shopAsync.value;
@@ -32,8 +45,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        width: 850,
-        constraints: BoxConstraints(maxHeight: screenHeight * 0.88),
+        constraints: BoxConstraints(maxWidth: 1000, maxHeight: screenHeight * 0.90),
         padding: const EdgeInsets.all(18),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -76,41 +88,54 @@ class PlanShowcaseDialog extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
 
-            // 3-Tier Comparison Cards
+            // 3-Tier Comparison Cards with Responsive Scrolling
             Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isSmall = constraints.maxWidth < 680;
+              child: Scrollbar(
+                controller: _scrollController,
+                thumbVisibility: true,
+                trackVisibility: true,
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isSmall = constraints.maxWidth < 740;
 
-                  if (isSmall) {
+                    if (isSmall) {
+                      // Mobile View (Stacked Cards)
+                      return SingleChildScrollView(
+                        controller: _scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(right: 6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom),
+                            const SizedBox(height: 14),
+                            _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? ''),
+                            const SizedBox(height: 14),
+                            _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? ''),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      );
+                    }
+
+                    // Tablet & Desktop View (Horizontal Row of 3 Columns with Vertical Scroll Support)
                     return SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom),
-                          const SizedBox(height: 14),
-                          _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? ''),
-                          const SizedBox(height: 14),
-                          _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? ''),
-                          const SizedBox(height: 8),
+                          Expanded(child: _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom)),
+                          const SizedBox(width: 14),
+                          Expanded(child: _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? '')),
+                          const SizedBox(width: 14),
+                          Expanded(child: _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? '')),
                         ],
                       ),
                     );
-                  }
-
-                  return SingleChildScrollView(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _buildFreeCard(context, ref, lang, isCurrent: !isPro && !isCustom)),
-                        const SizedBox(width: 14),
-                        Expanded(child: _buildProCard(context, ref, lang, isCurrent: isPro, shopId: shop?.id ?? '')),
-                        const SizedBox(width: 14),
-                        Expanded(child: _buildCustomCard(context, ref, lang, isCurrent: isCustom, shopId: shop?.id ?? '')),
-                      ],
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
             ),
           ],
@@ -169,13 +194,19 @@ class PlanShowcaseDialog extends ConsumerWidget {
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
           const Divider(color: Color(0xFF334155), height: 20),
-          _buildFeatureItem(lang == AppLanguage.my ? '100% Offline SQLite ACID စနစ်' : '100% Offline SQLite ACID Ready'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'အရောင်းနှင့် ဘောက်ချာ အကန့်အသတ်မရှိ' : 'Unlimited Orders & Invoices'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'စတော့စာရင်းနှင့် အဝင်/အထွက်' : 'Product & Stock Management'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'ဖောက်သည် & အကြွေးစာရင်း' : 'Customer CRM & Debt Repayment'),
-          _buildFeatureItem(lang == AppLanguage.my ? '58mm / 80mm Thermal Receipt Print' : '58mm/80mm Thermal Receipts'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'ကက်ရှာ PIN နှင့် အဆိုင်းစစ်ဆေးခြင်း' : 'Cashier PIN & Shift Drawers'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် Z-Report စာရင်းချုပ်' : 'Daily Z-Report & Audit Slip'),
+          _buildFeatureItem(lang == AppLanguage.my ? '100% Offline SQLite ACID အော့ဖ်လိုင်း စနစ်' : '100% Offline SQLite ACID Database'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Language (မြန်မာစာ 🇲🇲 / English 🇬🇧 ဘာသာစကား)' : 'Bilingual Support (Myanmar & English)'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Barcode Scan Gun (ကင်မရာ & USB/BT စကန်ဖတ်စက်)' : 'Barcode Scanner (Camera & Scan Gun HID)'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Category (ကုန်ပစ္စည်း အမျိုးအစား & အရောင်ခွဲစနစ်)' : 'Product Categories with Color Codes'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Shop Profile (ဆိုင်အချက်အလက် & ငွေကြေးသတ်မှတ်မှု)' : 'Shop Profile & Currency Setup (MMK/USD/THB)'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Cashier PIN (ဝန်ထမ်း PIN & Lock Screen စနစ်)' : 'Cashier PIN Security & Lock Screen'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Excel & JSON Data Backup (ဒေတာ သိမ်းဆည်းမှု)' : 'Excel (CSV) & JSON Local Data Backup'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'အရောင်းနှင့် ဘောက်ချာ အကန့်အသတ်မရှိ ထုတ်ယူနိုင်ခြင်း' : 'Unlimited Orders & Thermal Invoices'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'စတော့စာရင်း၊ အဝင်/အထွက် & ပျက်စီးဆုံးရှုံးမှု' : 'Inventory Tracking, Stock In/Out & Wastage'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'ဖောက်သည် စာရင်းနှင့် အကြွေး/ကြွေးဆပ် မှတ်တမ်း' : 'Customer CRM & Debt Repayment Ledger'),
+          _buildFeatureItem(lang == AppLanguage.my ? '58mm / 80mm Thermal Receipt ပရင်တာ ချိတ်ဆက်မှု' : '58mm / 80mm ESC/POS Thermal Printers'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'အဆိုင်းဖွင့်/ပိတ်၊ Pay In/Out & ငွေစာရင်းစစ်ဆေးမှု' : 'Shift Management, Pay In/Out & Audit'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် Z-Report စာရင်းချုပ် & စာရင်းစစ် ပြေစာ' : 'Daily Z-Report & Audit Summary Slips'),
         ],
       ),
     );
@@ -232,6 +263,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
           const Divider(color: Color(0xFF334155), height: 20),
+          _buildFeatureItem(lang == AppLanguage.my ? 'FREE စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in FREE plan, plus:'),
           _buildFeatureItem(lang == AppLanguage.my ? 'UOM (ယူနစ် အတိုင်းအတာ စီမံခန့်ခွဲမှု)' : 'UOM (Unit of Measure)'),
           _buildFeatureItem(lang == AppLanguage.my ? 'Promotion (ပရိုမိုးရှင်း အစီအစဉ်များ)' : 'Promotion Management'),
           _buildFeatureItem(lang == AppLanguage.my ? 'Purchase (အဝယ်စာရင်း & ပေးသွင်းသူများ)' : 'Purchase & Supplier Tracking'),
@@ -242,6 +274,9 @@ class PlanShowcaseDialog extends ConsumerWidget {
           _buildFeatureItem(lang == AppLanguage.my ? 'Price List (စျေးနှုန်းစာရင်း အဆင့်ဆင့်)' : 'Custom Price Lists'),
           _buildFeatureItem(lang == AppLanguage.my ? 'Repost (စာရင်းပြန်ထုတ် & အဆင့်မြင့် အစီရင်ခံစာ)' : 'Repost & Advanced Reports'),
           _buildFeatureItem(lang == AppLanguage.my ? 'Offline Sync (100% အော့ဖ်လိုင်း & Multi-Device Sync)' : 'Offline Sync & Multi-Device Sync'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'ဖုန်းနှင့် Tablet စက်များစွာ ချိတ်ဆက်ရောင်းနိုင်ခြင်း' : 'Multi-device Concurrent POS Terminals'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် အလိုအလျောက် Cloud Backup' : 'Daily Automated Cloud Backup'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Telegram Priority နည်းပညာ အကူအညီ' : 'Priority Support via Telegram'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
@@ -328,6 +363,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
           const Divider(color: Color(0xFF334155), height: 20),
+          _buildFeatureItem(lang == AppLanguage.my ? 'PRO စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in PRO plan, plus:'),
           _buildFeatureItem(lang == AppLanguage.my ? 'HR Management (ဝန်ထမ်းရေးရာ စီမံခန့်ခွဲမှု)' : 'HR Management'),
           _buildFeatureItem(lang == AppLanguage.my ? 'CRM Management (ဖောက်သည် ဆက်ဆံရေး စီမံခန့်ခွဲမှု)' : 'CRM Management'),
           _buildFeatureItem(lang == AppLanguage.my ? 'Branch Management (ဆိုင်ခွဲများ ကွင်းဆက် စီမံမှု)' : 'Branch Management'),
@@ -335,6 +371,8 @@ class PlanShowcaseDialog extends ConsumerWidget {
           _buildFeatureItem(lang == AppLanguage.my ? 'AI Assistant Chat (အရောင်း & စတော့ AI အထောက်အကူ)' : 'AI Assistant Chat'),
           _buildFeatureItem(lang == AppLanguage.my ? '24/7 Customer Service Bot (၂၄ နာရီ ဝန်ဆောင်မှု Bot)' : '24/7 Customer Service Bot'),
           _buildFeatureItem(lang == AppLanguage.my ? 'Accounting / Finance (ဘဏ္ဍာရေး & စာရင်းကိုင်စနစ်)' : 'Accounting / Finance'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Custom ERP / API Integration (စိတ်ကြိုက် စနစ်များ)' : 'Custom ERP & API Integrations'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'သီးသန့် Database & Cloud Server Hosting' : 'Dedicated Database & Cloud Server'),
           _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် Enterprise စနစ်များ (etc)' : 'Custom Enterprise Integrations & etc'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
@@ -358,7 +396,7 @@ class PlanShowcaseDialog extends ConsumerWidget {
 
   Widget _buildFeatureItem(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 2.5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
