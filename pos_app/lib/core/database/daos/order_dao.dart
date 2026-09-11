@@ -20,6 +20,18 @@ class SalesSummary {
   });
 }
 
+class OrderWithDetails {
+  final Order order;
+  final List<OrderItem> items;
+  final Customer? customer;
+
+  OrderWithDetails({
+    required this.order,
+    required this.items,
+    this.customer,
+  });
+}
+
 @DriftAccessor(tables: [Orders, OrderItems, Products])
 class OrderDao extends DatabaseAccessor<AppDatabase> with _$OrderDaoMixin {
   OrderDao(super.db);
@@ -31,6 +43,54 @@ class OrderDao extends DatabaseAccessor<AppDatabase> with _$OrderDaoMixin {
           ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)])
           ..limit(limit))
         .watch();
+  }
+
+  /// Watch orders with optional date range and search filter
+  Stream<List<Order>> watchOrdersFiltered({
+    DateTime? startDate,
+    DateTime? endDate,
+    String? query,
+    int limit = 300,
+  }) {
+    return (select(orders)
+          ..where((tbl) {
+            Expression<bool> predicate = tbl.deletedAt.isNull();
+            if (startDate != null) {
+              predicate = predicate & tbl.createdAt.isBiggerOrEqualValue(startDate);
+            }
+            if (endDate != null) {
+              predicate = predicate & tbl.createdAt.isSmallerOrEqualValue(endDate);
+            }
+            if (query != null && query.trim().isNotEmpty) {
+              final q = '%${query.trim()}%';
+              predicate = predicate & tbl.orderNumber.like(q);
+            }
+            return predicate;
+          })
+          ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)])
+          ..limit(limit))
+        .watch();
+  }
+
+  /// Get order with its line items and customer
+  Future<OrderWithDetails?> getOrderWithDetails(String orderId) async {
+    final order = await (select(orders)..where((tbl) => tbl.id.equals(orderId))).getSingleOrNull();
+    if (order == null) return null;
+
+    final items = await getItemsForOrder(orderId);
+
+    Customer? customer;
+    if (order.customerId != null && order.customerId!.isNotEmpty) {
+      customer = await (attachedDatabase.select(attachedDatabase.customers)
+            ..where((tbl) => tbl.id.equals(order.customerId!)))
+          .getSingleOrNull();
+    }
+
+    return OrderWithDetails(
+      order: order,
+      items: items,
+      customer: customer,
+    );
   }
 
   /// Get order items for a specific order

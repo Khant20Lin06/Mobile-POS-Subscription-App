@@ -37,6 +37,7 @@ class AppTranslations {
     'nav_register': {'en': 'POS', 'my': 'POS'},
     'nav_inventory': {'en': 'Inventory', 'my': 'စတော့'},
     'nav_customers': {'en': 'Customers', 'my': 'ဖောက်သည်'},
+    'nav_invoices': {'en': 'Invoices', 'my': 'ဘောက်ချာ'},
     'nav_zreport': {'en': 'Report', 'my': 'အစီရင်ခံစာ'},
     'nav_settings': {'en': 'Settings', 'my': 'ဆက်တင်များ'},
     'nav_dbsync': {'en': 'DB & Sync', 'my': 'ဒေတာ & ဆင့်ခ်'},
@@ -77,6 +78,23 @@ class AppTranslations {
     'cust_total': {'en': 'Total Customers', 'my': 'ဖောက်သည်ဦးရေ'},
     'cust_total_debt': {'en': 'Market Debt', 'my': 'စုစုပေါင်းအကြွေးကျန်'},
     'cust_repay': {'en': 'Repay Debt', 'my': 'အကြွေးဆပ်မည်'},
+
+    // Sale Invoices
+    'invoice_title': {'en': 'Sale Invoices', 'my': 'အရောင်းဘောက်ချာ မှတ်တမ်း'},
+    'invoice_filter_today': {'en': 'Today', 'my': 'ယနေ့'},
+    'invoice_filter_week': {'en': 'This Week', 'my': 'ဒီတစ်ပတ်'},
+    'invoice_filter_month': {'en': 'This Month', 'my': 'ဒီလ'},
+    'invoice_filter_all': {'en': 'All Time', 'my': 'အားလုံး'},
+    'invoice_search_hint': {'en': 'Search invoice # or customer...', 'my': 'ဘောက်ချာနံပါတ် သို့မဟုတ် ဖောက်သည်ဖြင့် ရှာရန်...'},
+    'invoice_total_count': {'en': 'Total Invoices', 'my': 'စုစုပေါင်း ဘောက်ချာ'},
+    'invoice_total_sales': {'en': 'Total Revenue', 'my': 'စုစုပေါင်း ရောင်းရငွေ'},
+    'invoice_reprint': {'en': 'Print Thermal Slip', 'my': 'ပြေစာ ပြန်ထုတ်မည်'},
+    'invoice_detail_title': {'en': 'Invoice Details', 'my': 'ဘောက်ချာ အသေးစိတ်'},
+    'invoice_walk_in': {'en': 'Walk-in Customer', 'my': 'အထွေထွေဝယ်ယူသူ'},
+    'invoice_items': {'en': 'Items', 'my': 'မျိုး'},
+    'invoice_no_invoices': {'en': 'No invoices found', 'my': 'ဘောက်ချာမှတ်တမ်း မရှိသေးပါ'},
+    'invoice_export_pdf': {'en': 'Export PDF Invoice', 'my': 'PDF ဘောက်ချာ ထုတ်မည်'},
+    'invoice_pdf_pro_notice': {'en': 'PDF export is a PRO feature. Upgrade to unlock digital invoices & logo customization.', 'my': 'PDF ဘောက်ချာ ထုတ်ယူခြင်းသည် PRO အစီအစဉ် feature ဖြစ်ပါသည်။ Logo ထည့်သွင်းခြင်းနှင့် Digital Invoice ထုတ်ယူရန် PRO သို့ အဆင့်မြှင့်ပါ။'},
 
     // Plans & Subscription
     'plan_free': {'en': 'FREE (Offline Ready)', 'my': 'FREE (အော့ဖ်လိုင်းအသုံးပြုခွင့်)'},

@@ -4,10 +4,10 @@ import '../auth/providers/auth_provider.dart';
 import '../auth/widgets/admin_override_dialog.dart';
 import '../auth/widgets/pin_login_dialog.dart';
 import '../customers/screens/customers_screen.dart';
+import '../invoices/screens/sale_invoice_screen.dart';
 import '../settings/screens/settings_screen.dart';
 import '../inventory/screens/inventory_screen.dart';
 import '../pos/screens/pos_screen.dart';
-import '../reports/screens/daily_z_report_screen.dart';
 import '../../core/localization/app_locale.dart';
 
 class AppShell extends ConsumerStatefulWidget {
@@ -24,18 +24,18 @@ class _AppShellState extends ConsumerState<AppShell> {
     PosScreen(),
     InventoryScreen(),
     CustomersScreen(),
-    DailyZReportScreen(),
+    SaleInvoiceScreen(),
     SettingsScreen(),
   ];
 
   void _onDestinationSelected(int idx) async {
     final activeUser = ref.read(currentUserProvider);
 
-    // If cashier attempts to access Z-Report (3) or Settings (4)
-    if (activeUser?.role == 'cashier' && (idx == 3 || idx == 4)) {
+    // If cashier attempts to access Settings (4)
+    if (activeUser?.role == 'cashier' && idx == 4) {
       final approved = await AdminOverrideDialog.requestApproval(
         context,
-        actionTitle: idx == 3 ? 'View Daily Z-Report' : 'Access Settings & Management',
+        actionTitle: 'Access Settings & Management',
       );
       if (!approved) return;
     }
@@ -132,9 +132,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                       label: Text(AppTranslations.tr('nav_customers', lang)),
                     ),
                     NavigationRailDestination(
-                      icon: const Icon(Icons.receipt_long_outlined),
-                      selectedIcon: const Icon(Icons.receipt_long),
-                      label: Text(AppTranslations.tr('nav_zreport', lang)),
+                      icon: const Icon(Icons.receipt_outlined),
+                      selectedIcon: const Icon(Icons.receipt),
+                      label: Text(AppTranslations.tr('nav_invoices', lang)),
                     ),
                     NavigationRailDestination(
                       icon: const Icon(Icons.settings_outlined),
@@ -182,9 +182,9 @@ class _AppShellState extends ConsumerState<AppShell> {
                   label: AppTranslations.tr('nav_customers', lang),
                 ),
                 NavigationDestination(
-                  icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF94A3B8)),
-                  selectedIcon: const Icon(Icons.receipt_long, color: Color(0xFF60A5FA)),
-                  label: AppTranslations.tr('nav_zreport', lang),
+                  icon: const Icon(Icons.receipt_outlined, color: Color(0xFF94A3B8)),
+                  selectedIcon: const Icon(Icons.receipt, color: Color(0xFF60A5FA)),
+                  label: AppTranslations.tr('nav_invoices', lang),
                 ),
                 NavigationDestination(
                   icon: const Icon(Icons.settings_outlined, color: Color(0xFF94A3B8)),

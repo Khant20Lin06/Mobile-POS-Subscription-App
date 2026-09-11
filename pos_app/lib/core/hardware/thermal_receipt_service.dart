@@ -515,7 +515,7 @@ class EscPosBuilder {
     writeln('-' * width);
 
     for (final item in data.items) {
-      writeln(item.name);
+      writeln(item.name.padRight(width));
       final qtyPrice = '  ${item.quantity} x ${ThermalReceiptFormatter._currencyFormat.format(item.unitPrice)}';
       final itemTotal = '${ThermalReceiptFormatter._currencyFormat.format(item.subtotal)} ${data.currency}';
       writeln(ThermalReceiptFormatter._twoColumns(qtyPrice, itemTotal, width));

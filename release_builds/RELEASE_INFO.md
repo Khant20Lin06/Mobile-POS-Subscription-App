@@ -39,7 +39,20 @@
   - **POS Sales Screen**: Barcode ပစ်လိုက်သည်နှင့် Cart ထဲသို့ တိုက်ရိုက် Product ထည့်သွင်းပေးခြင်း
   - **Inventory Screen**: Barcode Scan ဖတ်၍ ပစ္စည်းရှာဖွေခြင်း၊ Stock In / Out အမြန်ပြုလုပ်ခြင်း
 
-### 3. Permissions & Platform Compatibility
+### 4. Sale Invoice Management & UX Enhancements
+- **Sale Invoice History (Free Plan)**:
+  - ဘောက်ချာမှတ်တမ်းများအားလုံးကို အချိန်ကာလ (Today, This Week, This Month, All Time) အလိုက် စစ်ထုတ်ကြည့်ရှုနိုင်ခြင်း။
+  - ဘောက်ချာနံပါတ် သို့မဟုတ် Customer name ဖြင့် real-time ရှာဖွေနိုင်ခြင်း။
+  - အရောင်းပြေစာအား Thermal Printer ဖြင့် ပြန်လည်ထုတ်ယူနိုင်ခြင်း (Re-print slip)။
+- **PDF Invoice Export (PRO Plan)**:
+  - A4 Digital PDF Invoice ကို Logo နှင့်တကွ ထုတ်ယူ share ပြုလုပ်နိုင်ခြင်း။
+- **5-Item Mobile Navigation**:
+  - POS, Inventory, Customers, Invoices, Settings (စံသတ်မှတ်ချက် ၅ ခုဖြင့် သပ်ရပ်ရှင်းလင်းသော mobile layout)။
+  - Daily Z-Report / အရောင်းအစီရင်ခံစာကို Settings header ညာဘက်တွင် "အစီရင်ခံစာ" ခလုတ်အဖြစ် ထည့်သွင်းထားရှိခြင်း။
+- **Receipt Left-aligned Product Names**:
+  - Bluetooth နှင့် Thermal Slip ပေါ်တွင် ကုန်ပစ္စည်းအမည်များကို သဘာဝကျကျ ဘယ်ဘက်သို့ ညှိထားပြီး စျေးနှုန်းနှင့် စုစုပေါင်းကို ညာဘက်တွင် သပ်ရပ်စွာ စီစဉ်ပေးထားခြင်း။
+
+### 5. Permissions & Platform Compatibility
 - **Android**:
   - `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`, `ACCESS_FINE_LOCATION` (Android 12+ နှင့် Android 6-11 အားလုံးအတွက် Runtime Permission Request dialog များ တိုက်ရိုက် native OS level တွင် တောင်းဆိုပေးခြင်း)
   - `CAMERA` (ဖုန်း camera ဖြင့် barcode ဖတ်ရန် runtime permission auto request)

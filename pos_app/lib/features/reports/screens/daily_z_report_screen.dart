@@ -89,14 +89,22 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
     final endRange = range.$2;
     final periodLabel = range.$3;
 
+    final canPop = Navigator.canPop(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E293B),
         elevation: 0,
+        leading: canPop
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
         title: Row(
           children: [
-            const AppHeaderLogo(),
+            if (!canPop) const AppHeaderLogo(),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

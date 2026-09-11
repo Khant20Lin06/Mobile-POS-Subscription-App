@@ -19,6 +19,7 @@ import '../widgets/scan_gun_settings_dialog.dart';
 import '../widgets/backup_restore_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/widgets/app_header_logo.dart';
+import '../../reports/screens/daily_z_report_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -60,6 +61,42 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2563EB),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: const BorderSide(color: Color(0xFF3B82F6), width: 1),
+                ),
+              ),
+              icon: const Icon(Icons.receipt_long, size: 16),
+              label: Text(
+                AppTranslations.tr('nav_zreport', lang),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+              onPressed: () async {
+                if (activeUser?.role == 'cashier') {
+                  final approved = await AdminOverrideDialog.requestApproval(
+                    context,
+                    actionTitle: 'View Daily Z-Report',
+                  );
+                  if (!approved) return;
+                }
+                if (!context.mounted) return;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DailyZReportScreen()),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
