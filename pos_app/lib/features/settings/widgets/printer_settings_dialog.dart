@@ -31,6 +31,7 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
   late TextEditingController _printerNameController;
 
   List<Printer> _availablePrinters = [];
+  List<BluetoothPrinterDevice> _bluetoothPrinters = [];
   bool _isScanning = false;
   bool _isTestingConnection = false;
   String? _connectionTestResult;
@@ -59,7 +60,11 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
   }
 
   Future<void> _scanPrinters() async {
-    setState(() => _isScanning = true);
+    setState(() {
+      _isScanning = true;
+      _connectionTestResult = null;
+      _connectionTestSuccess = null;
+    });
     try {
       if (_connectionType == 'bluetooth') {
         final granted = await HardwarePermissionService.requestBluetoothPermissions();
@@ -76,16 +81,26 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
             ),
           );
         }
-      }
-      final list = await SystemThermalPrinterService.listPrinters();
-      if (mounted) {
-        setState(() {
-          _availablePrinters = list;
-          if (_printerNameController.text.trim().isEmpty && list.isNotEmpty) {
-            final defaultPrinter = list.where((p) => p.isDefault).firstOrNull ?? list.first;
-            _printerNameController.text = defaultPrinter.name;
-          }
-        });
+        final btList = await BluetoothThermalPrinterService.listPairedPrinters();
+        if (mounted) {
+          setState(() {
+            _bluetoothPrinters = btList;
+            if (_printerNameController.text.trim().isEmpty && btList.isNotEmpty) {
+              _printerNameController.text = btList.first.address;
+            }
+          });
+        }
+      } else {
+        final list = await SystemThermalPrinterService.listPrinters();
+        if (mounted) {
+          setState(() {
+            _availablePrinters = list;
+            if (_printerNameController.text.trim().isEmpty && list.isNotEmpty) {
+              final defaultPrinter = list.where((p) => p.isDefault).firstOrNull ?? list.first;
+              _printerNameController.text = defaultPrinter.name;
+            }
+          });
+        }
       }
     } catch (_) {
     } finally {
@@ -105,6 +120,35 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
     final ip = _ipController.text.trim();
     final port = int.tryParse(_portController.text.trim()) ?? 9100;
     final result = await NetworkThermalPrinterService.testConnection(ip, port);
+
+    if (mounted) {
+      setState(() {
+        _isTestingConnection = false;
+        _connectionTestSuccess = result.success;
+        _connectionTestResult = result.message;
+      });
+    }
+  }
+
+  Future<void> _testBluetoothConnection() async {
+    final addr = _printerNameController.text.trim();
+    if (addr.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Color(0xFFEF4444),
+          content: Text('Please select or enter a paired Bluetooth printer first!'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isTestingConnection = true;
+      _connectionTestResult = null;
+      _connectionTestSuccess = null;
+    });
+
+    final result = await BluetoothThermalPrinterService.testConnection(addr);
 
     if (mounted) {
       setState(() {
@@ -523,7 +567,9 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      lang == AppLanguage.my ? 'တွေ့ရှိထားသော စက်ကိရိယာများ' : 'Detected Hardware Devices',
+                      _connectionType == 'bluetooth'
+                          ? (lang == AppLanguage.my ? 'ချိတ်ဆက်ထားသော Bluetooth စက်များ' : 'Paired Bluetooth Printers')
+                          : (lang == AppLanguage.my ? 'တွေ့ရှိထားသော စက်ကိရိယာများ' : 'Detected Hardware Devices'),
                       style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                     TextButton.icon(
@@ -542,91 +588,246 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                 ),
                 const SizedBox(height: 6),
 
-                if (_availablePrinters.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF334155)),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        isExpanded: true,
-                        dropdownColor: const Color(0xFF0F172A),
-                        value: _availablePrinters.any((p) => p.name == _printerNameController.text)
-                            ? _printerNameController.text
-                            : _availablePrinters.first.name,
-                        icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8)),
-                        items: _availablePrinters.map((p) {
-                          return DropdownMenuItem<String>(
-                            value: p.name,
-                            child: Row(
-                              children: [
-                                Icon(
-                                  p.isDefault ? Icons.star : Icons.print,
-                                  size: 16,
-                                  color: p.isDefault ? const Color(0xFFF59E0B) : const Color(0xFF38BDF8),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    '${p.name} ${p.isDefault ? "(Default)" : ""}',
-                                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                                    overflow: TextOverflow.ellipsis,
+                if (_connectionType == 'bluetooth') ...[
+                  if (_bluetoothPrinters.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF334155)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF0F172A),
+                          value: _bluetoothPrinters.any((p) => p.address == _printerNameController.text || p.name == _printerNameController.text)
+                              ? _printerNameController.text
+                              : _bluetoothPrinters.first.address,
+                          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8)),
+                          items: _bluetoothPrinters.map((p) {
+                            return DropdownMenuItem<String>(
+                              value: p.address,
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.bluetooth, size: 16, color: Color(0xFF38BDF8)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '${p.name} (${p.address})',
+                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          if (val != null) {
-                            setState(() => _printerNameController.text = val);
-                          }
-                        },
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() => _printerNameController.text = val);
+                            }
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ] else ...[
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF334155)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 8),
+                    // Test Bluetooth Connection Button
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.info_outline, size: 16, color: Color(0xFF38BDF8)),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                _connectionType == 'builtin'
-                                    ? 'Sunmi & iMin built-in thermal printers will print directly via native spooler.'
-                                    : _connectionType == 'bluetooth'
-                                        ? 'Please pair your Bluetooth thermal printer in device Settings first.'
-                                        : 'Please connect your USB printer via USB cable or OTG adapter.',
-                                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF38BDF8),
+                            side: const BorderSide(color: Color(0xFF38BDF8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          icon: _isTestingConnection
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF38BDF8)),
+                                )
+                              : const Icon(Icons.bluetooth_searching, size: 16),
+                          label: Text(
+                            _isTestingConnection ? 'Connecting...' : 'Test Connection',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: _isTestingConnection ? null : _testBluetoothConnection,
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.5)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.warning_amber_rounded, size: 18, color: Color(0xFFF59E0B)),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  lang == AppLanguage.my
+                                      ? 'Bluetooth ပရင်တာ မတွေ့ရှိသေးပါ'
+                                      : 'No Paired Bluetooth Printers Found',
+                                  style: const TextStyle(color: Color(0xFFFCD34D), fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
                               ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            lang == AppLanguage.my
+                                ? 'ဖုန်း၏ Settings > Bluetooth သို့ သွားရောက်ပြီး ပရင်တာကို အရင် Pair လုပ်ပေးပါ (Password ပုံမှန်အားဖြင့် 0000 သို့မဟုတ် 1234 ဖြစ်ပါသည်)။'
+                                : 'Please pair your Bluetooth thermal printer in Android Settings > Bluetooth first (PIN usually 0000 or 1234).',
+                            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF2563EB),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
-                          ],
+                            icon: const Icon(Icons.settings_bluetooth, size: 14, color: Colors.white),
+                            label: Text(
+                              lang == AppLanguage.my ? 'Bluetooth Settings ဖွင့်ရန်' : 'Open Bluetooth Settings',
+                              style: const TextStyle(fontSize: 11, color: Colors.white),
+                            ),
+                            onPressed: HardwarePermissionService.openSettings,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ] else ...[
+                  if (_availablePrinters.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF334155)),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          dropdownColor: const Color(0xFF0F172A),
+                          value: _availablePrinters.any((p) => p.name == _printerNameController.text)
+                              ? _printerNameController.text
+                              : _availablePrinters.first.name,
+                          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8)),
+                          items: _availablePrinters.map((p) {
+                            return DropdownMenuItem<String>(
+                              value: p.name,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    p.isDefault ? Icons.star : Icons.print,
+                                    size: 16,
+                                    color: p.isDefault ? const Color(0xFFF59E0B) : const Color(0xFF38BDF8),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '${p.name} ${p.isDefault ? "(Default)" : ""}',
+                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() => _printerNameController.text = val);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ] else ...[
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF334155)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.info_outline, size: 16, color: Color(0xFF38BDF8)),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  _connectionType == 'builtin'
+                                      ? 'Sunmi & iMin built-in thermal printers will print directly via native spooler.'
+                                      : 'Please connect your USB printer via USB cable or OTG adapter.',
+                                  style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+
+                if (_connectionTestResult != null) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: (_connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFEF4444)).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _connectionTestSuccess == true ? Icons.check_circle : Icons.error_outline,
+                          size: 16,
+                          color: _connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _connectionTestResult!,
+                            style: TextStyle(
+                              color: _connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFF87171),
+                              fontSize: 11,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
+
                 const SizedBox(height: 10),
                 TextField(
                   controller: _printerNameController,
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                   decoration: InputDecoration(
-                    labelText: lang == AppLanguage.my ? 'ပရင်တာ အမည် / Device Name' : 'Target Printer Name (or leave blank for default)',
+                    labelText: _connectionType == 'bluetooth'
+                        ? (lang == AppLanguage.my ? 'Bluetooth လိပ်စာ / MAC Address' : 'Printer Bluetooth Address (e.g. 66:22:33:44:55:66)')
+                        : (lang == AppLanguage.my ? 'ပရင်တာ အမည် / Device Name' : 'Target Printer Name (or leave blank for default)'),
                     labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-                    prefixIcon: const Icon(Icons.devices, color: Color(0xFF38BDF8), size: 18),
+                    prefixIcon: Icon(_connectionType == 'bluetooth' ? Icons.bluetooth : Icons.devices, color: const Color(0xFF38BDF8), size: 18),
                     filled: true,
                     fillColor: const Color(0xFF0F172A),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),

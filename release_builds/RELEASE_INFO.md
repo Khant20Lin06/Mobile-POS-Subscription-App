@@ -8,8 +8,8 @@
 
 | File Name | Platform / Type | File Size | Description & Usage |
 | :--- | :--- | :--- | :--- |
-| **`DOT-POS-v1.0.0.apk`** | Android Direct Install | **~64 MB** | Android Phones, Tablets, Sunmi V2/D2, iMin စက်များတွင် တိုက်ရိုက် Install ပြုလုပ်ရန် Signed Release APK |
-| **`DOT-POS-v1.0.0.aab`** | Android Play Console | **~51 MB** | Google Play Store Console > Production/Internal Testing သို့ တင်ရန် သီးသန့်ထုတ်ထားသော App Bundle |
+| **`DOT-POS-v1.0.0.apk`** | Android Direct Install | **~85 MB** | Android Phones, Tablets, Sunmi V2/D2, iMin စက်များတွင် တိုက်ရိုက် Install ပြုလုပ်ရန် Signed Release APK |
+| **`DOT-POS-v1.0.0.aab`** | Android Play Console | **~63 MB** | Google Play Store Console > Production/Internal Testing သို့ တင်ရန် သီးသန့်ထုတ်ထားသော App Bundle |
 | **`DOT-POS-Windows-x64-v1.0.0.zip`** | Windows x64 Portable | **~20 MB** | Windows 10/11 PC/Laptop/POS များတွင် Install လုပ်စရာမလိုဘဲ တိုက်ရိုက် ဖြည်ပြီး အသုံးပြုနိုင်သော Standalone Package |
 | **`DOT-POS-Apple-iOS-macOS-Sources.zip`** | Apple iOS & macOS | **~1 MB** | macOS / Xcode တွင် တိုက်ရိုက် `flutter build ipa` သို့မဟုတ် `flutter build macos` ထုတ်ယူရန် Ready-to-compile Bundle |
 | **`playstore-512x512.png`** | High-Res Official Icon | **118 KB** | Google Play Console Store Listing အတွက် 512x512 App Icon |
@@ -18,29 +18,32 @@
 
 ## ⚡ Core Hardware & Enterprise Features (v1.0.0)
 
-### 1. Thermal Receipt Printing (ESC/POS)
+### 1. Thermal Receipt Printing (ESC/POS & Native Bluetooth)
 - **Supported Connection Types**:
+  - **Native Bluetooth Thermal (SPP / RFCOMM)**: Android စနစ်၏ paired Bluetooth device များကို auto scan ရှာဖွေပေးခြင်း၊ Standard Serial Port Profile (UUID `00001101-0000-1000-8000-00805F9B34FB`) ဖြင့် တိုက်ရိုက် binary ESC/POS data ပို့ဆောင်ပေးခြင်း။ ချိတ်ဆက်မှုမရှိပါက Disconnected အမှန်အတိုင်း ပြသပေးပြီး Test Connection စစ်ဆေးနိုင်ခြင်း။
   - **Network / LAN / Wi-Fi**: Raw TCP Socket (Port 9100) — တိုက်ရိုက် IP လိပ်စာဖြင့် မြန်ဆန်စွာ slip ထုတ်ပေးခြင်း
   - **Sunmi / iMin Built-in Spooler**: Built-in thermal printer ပါရှိသော Android POS terminal များအတွက် auto spooling
-  - **Bluetooth & USB**: POS receipt printer များ ချိတ်ဆက်နိုင်ခြင်း
-  - **OS System Print**: Android / Windows default print dialog သို့ forwarding
+  - **USB & OS System Print**: Android / Windows default print dialog သို့ forwarding
 - **Paper Formats**: 58mm (Receipt standard) နှင့် 80mm (Wide receipt standard)
-- **Features**: Shop Header Logo, Center-aligned Shop Details, Myanmar Zawgyi/Unicode font formatting, Cash Drawer Kick-out command (`ESC p`), Paper Auto-cut command (`GS V 66 0`).
+- **Features**: Shop Header Logo, Center-aligned Shop Details, Myanmar Zawgyi/Unicode font formatting, Cash Drawer Kick-out command (`ESC p`), Paper Auto-cut command (`GS V 66 0`)။ PDF slip များကိုလည်း A4/Letter စာရွက်များတွင် Center တည့်တည့်တွင်သာ alignment ထားရှိပေးထားပါသည်။
 
-### 2. Barcode Scan Gun Integration
-- **Supported Scanners**:
+### 2. Barcode Scanning & Scan Gun Integration
+- **Interactive Camera Barcode Scanner**:
+  - POS Search Bar ရှိ Scan Icon ကို နှိပ်လိုက်သည်နှင့် Fullscreen Camera Scanner ပွင့်လာမည်ဖြစ်ပြီး Flashlight (Torch) ဖွင့်/ပိတ်ခြင်း၊ Camera ရှေ့/နောက် ပြောင်းလဲခြင်းများ ပြုလုပ်နိုင်ပါသည်။
+  - Scan ဖတ်မိသည်နှင့် Beep အသံမြည်ကာ Cart ထဲသို့ Product ကို auto ထည့်သွင်းပေးပါသည်။
+- **Hardware Barcode Scan Guns (USB & Bluetooth)**:
   - **USB Barcode Scanners**: Plug & Play USB HID keyboard wedge mode
   - **Bluetooth Barcode Scanners**: Wireless Bluetooth HID mode
+  - **Truth-in-Status Reporting**: Scan gun settings တွင် ချိတ်ဆက်မှုအချက်ပြ signal မရသေးဘဲ "Connected" လို့ မပြဘဲ "Waiting for Scan Signal" ဖြင့်သာ စောင့်ဆိုင်းပြီး အမှန်တကယ် signal ရမှသာ "Connected & Verified" သို့ ပြောင်းလဲပေးပါသည်။
 - **Integration Points**:
-  - **POS Sales Screen**: Global key-event interception ဖြင့် မည်သည့် input focus မှမလိုဘဲ Barcode ပစ်လိုက်သည်နှင့် Cart ထဲသို့ တိုက်ရိုက် Product ထည့်သွင်းပေးပြီး audio beep သံ မြည်ပေးခြင်း
+  - **POS Sales Screen**: Barcode ပစ်လိုက်သည်နှင့် Cart ထဲသို့ တိုက်ရိုက် Product ထည့်သွင်းပေးခြင်း
   - **Inventory Screen**: Barcode Scan ဖတ်၍ ပစ္စည်းရှာဖွေခြင်း၊ Stock In / Out အမြန်ပြုလုပ်ခြင်း
-  - **Hardware Setting Screen**: Live scanner test bed ပါရှိသဖြင့် Scanner မှ ပို့သော Barcode key-events များကို real-time စမ်းသပ်စစ်ဆေးနိုင်ခြင်း
 
 ### 3. Permissions & Platform Compatibility
 - **Android**:
-  - `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`, `ACCESS_FINE_LOCATION` (Android 12+ နှင့် Legacy Android အတွက် အပြည့်အစုံ)
-  - `INTERNET`, `ACCESS_NETWORK_STATE` (Cloud sync & update verification)
-  - `CAMERA` (ဖုန်း camera ဖြင့် barcode ဖတ်ရန် optional permission)
+  - `BLUETOOTH_CONNECT`, `BLUETOOTH_SCAN`, `ACCESS_FINE_LOCATION` (Android 12+ နှင့် Android 6-11 အားလုံးအတွက် Runtime Permission Request dialog များ တိုက်ရိုက် native OS level တွင် တောင်းဆိုပေးခြင်း)
+  - `CAMERA` (ဖုန်း camera ဖြင့် barcode ဖတ်ရန် runtime permission auto request)
+  - `INTERNET`, `ACCESS_NETWORK_STATE`
 - **iOS / macOS**:
   - `NSBluetoothAlwaysUsageDescription`, `NSBluetoothPeripheralUsageDescription`, `NSCameraUsageDescription` pre-configured in `Info.plist`.
 

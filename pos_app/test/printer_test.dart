@@ -75,5 +75,26 @@ void main() {
       expect(bytes.first, 0x1B); // ESC
       expect(bytes.sublist(bytes.length - 4), [0x1D, 0x56, 0x41, 0x10]); // Cut
     });
+
+    test('BluetoothPrinterDevice model serialization and instantiation', () {
+      final device = BluetoothPrinterDevice.fromMap({
+        'name': 'POS-58-Bluetooth',
+        'address': '66:22:33:44:55:66',
+        'type': 1,
+      });
+
+      expect(device.name, 'POS-58-Bluetooth');
+      expect(device.address, '66:22:33:44:55:66');
+      expect(device.type, 1);
+    });
+
+    test('SystemThermalPrinterService getFormat respects 58mm and 80mm roll width', () {
+      final format58 = SystemThermalPrinterService.getFormat('58mm');
+      final format80 = SystemThermalPrinterService.getFormat('80mm');
+
+      expect(format58.width, lessThan(format80.width));
+      expect(format58.width, closeTo(58 * 72 / 25.4, 0.5));
+      expect(format80.width, closeTo(80 * 72 / 25.4, 0.5));
+    });
   });
 }

@@ -212,38 +212,64 @@ class _ScanGunSettingsDialogState extends ConsumerState<ScanGunSettingsDialog> {
               ),
               const SizedBox(height: 14),
 
-              // Hardware Status Banner
+              // Hardware Status Banner (Only shows success after real scan is received)
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0F172A),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5)),
+                  border: Border.all(
+                    color: _testResult != null
+                        ? const Color(0xFF10B981).withValues(alpha: 0.7)
+                        : const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 18),
+                        Icon(
+                          _testResult != null ? Icons.check_circle : Icons.sensors,
+                          color: _testResult != null ? const Color(0xFF10B981) : const Color(0xFF38BDF8),
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            lang == AppLanguage.my
-                                ? 'Hardware Scan Gun Listening (အသင့်ဖြစ်ပါသည်)'
-                                : 'Hardware Scan Gun Active (Listening for USB & Bluetooth HID)',
-                            style: const TextStyle(color: Color(0xFF34D399), fontSize: 11, fontWeight: FontWeight.bold),
+                            _testResult != null
+                                ? (lang == AppLanguage.my
+                                    ? '✓ စကန်ဖတ်စက် ချိတ်ဆက်မိပါသည် (Connected & Verified)'
+                                    : '✓ Scan Gun Verified & Active (Signal Received)')
+                                : (lang == AppLanguage.my
+                                    ? 'စကန်ဖတ်စက်မှ အချက်ပြ စောင့်ဆိုင်းနေပါသည် (Waiting for Scan)'
+                                    : 'Waiting for Scanner Signal (Point & Scan to Verify)'),
+                            style: TextStyle(
+                              color: _testResult != null ? const Color(0xFF34D399) : const Color(0xFF38BDF8),
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      _scannerType == 'usb_hid'
-                          ? 'USB Laser Gun: Plug into PC USB port or Android USB-OTG. Operates as plug-and-play keyboard.'
-                          : _scannerType == 'bluetooth_hid'
-                              ? 'Bluetooth Wireless Gun: Pair device in Bluetooth settings as HID keyboard. Trigger automatically sends input.'
-                              : 'Camera Scanner: Uses built-in device camera to scan barcodes.',
+                      _testResult != null
+                          ? (lang == AppLanguage.my
+                              ? 'စကန်ဖတ်စက်မှ ဘားကုဒ် အောင်မြင်စွာ လက်ခံရရှိပြီးဖြစ်၍ POS အရောင်းတွင် တိုက်ရိုက် အသုံးပြုနိုင်ပါပြီ။'
+                              : 'Hardware signal verified successfully! Gun is ready to auto-add products in POS screen.')
+                          : _scannerType == 'usb_hid'
+                              ? (lang == AppLanguage.my
+                                  ? 'USB ကြိုးထိုးပြီး စကန်ဖတ်ကြည့်ပါ။ စကန်ဖတ်စက် မချိတ်ဆက်ရသေးပါက အောင်မြင်သည်ဟု မပြပါ။'
+                                  : 'Plug in USB scanner and scan a barcode below to verify connection.')
+                              : _scannerType == 'bluetooth_hid'
+                                  ? (lang == AppLanguage.my
+                                      ? 'Bluetooth Settings တွင် Barcode Gun ကို Pair အရင်လုပ်ပြီး ဘားကုဒ် ပစ်ကြည့်ပါ။'
+                                      : 'Pair Bluetooth scanner in device settings as HID keyboard, then test scan below.')
+                                  : (lang == AppLanguage.my
+                                      ? 'ဖုန်း Camera ဖြင့် ဘားကုဒ် စကန်ဖတ်နိုင်ပါသည်။'
+                                      : 'Uses device camera for barcode scanning.'),
                       style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10.5),
                     ),
                   ],

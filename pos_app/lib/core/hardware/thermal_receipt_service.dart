@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -602,7 +603,94 @@ class NetworkThermalPrinterService {
   }
 }
 
-/// Native System / Spooler / Built-in / Bluetooth / USB Thermal Printer Service
+/// Represents a paired or discovered Bluetooth Printer
+class BluetoothPrinterDevice {
+  final String name;
+  final String address;
+  final int type;
+
+  const BluetoothPrinterDevice({
+    required this.name,
+    required this.address,
+    this.type = 0,
+  });
+
+  factory BluetoothPrinterDevice.fromMap(Map<dynamic, dynamic> map) {
+    return BluetoothPrinterDevice(
+      name: (map['name'] as String?) ?? 'Unknown Printer',
+      address: (map['address'] as String?) ?? '',
+      type: (map['type'] as int?) ?? 0,
+    );
+  }
+}
+
+/// Native Android Bluetooth ESC/POS Thermal Printer Service via MethodChannel
+class BluetoothThermalPrinterService {
+  static const MethodChannel _channel = MethodChannel('com.khantlin.mobile_pos/hardware');
+
+  /// List all bonded (paired) Bluetooth printers
+  static Future<List<BluetoothPrinterDevice>> listPairedPrinters() async {
+    if (kIsWeb || !Platform.isAndroid) {
+      return [];
+    }
+    try {
+      final List<dynamic>? rawList = await _channel.invokeListMethod('getBluetoothPrinters');
+      if (rawList == null) return [];
+      return rawList
+          .map((item) => BluetoothPrinterDevice.fromMap(item as Map<dynamic, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Test connection to a paired Bluetooth printer
+  static Future<PrintResult> testConnection(String address) async {
+    if (kIsWeb || !Platform.isAndroid) {
+      return const PrintResult(
+        success: false,
+        message: 'Bluetooth printing is only supported on Android devices.',
+      );
+    }
+    try {
+      final res = await _channel.invokeMapMethod<String, dynamic>(
+        'testBluetoothConnection',
+        {'address': address},
+      );
+      final success = res?['success'] as bool? ?? false;
+      final message = res?['message'] as String? ?? 'Connection failed';
+      return PrintResult(success: success, message: message);
+    } catch (e) {
+      return PrintResult(success: false, message: 'Bluetooth Test Error: $e');
+    }
+  }
+
+  /// Send ESC/POS raw bytes directly to Bluetooth printer
+  static Future<PrintResult> printBytes(String address, Uint8List bytes) async {
+    if (kIsWeb || !Platform.isAndroid) {
+      return const PrintResult(
+        success: false,
+        message: 'Bluetooth printing is only supported on Android devices.',
+      );
+    }
+    try {
+      final res = await _channel.invokeMapMethod<String, dynamic>(
+        'printBluetoothEscPos',
+        {
+          'address': address,
+          'bytes': bytes,
+        },
+      );
+      final success = res?['success'] as bool? ?? false;
+      final message = res?['message'] as String? ?? 'Print failed';
+      return PrintResult(success: success, message: message);
+    } catch (e) {
+      return PrintResult(success: false, message: 'Bluetooth Print Error: $e');
+    }
+  }
+}
+
+/// Native System / Spooler / Built-in / USB Thermal Printer Service
 class SystemThermalPrinterService {
   static Future<List<Printer>> listPrinters() async {
     try {
@@ -638,98 +726,108 @@ class SystemThermalPrinterService {
         pw.Page(
           pageFormat: pageFormat,
           build: (pw.Context context) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.symmetric(vertical: 4),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                children: [
-                  // Shop Header
-                  pw.Center(
-                    child: pw.Text(
-                      receipt.shopName.toUpperCase(),
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: is80mm ? 12 : 10),
-                      textAlign: pw.TextAlign.center,
-                    ),
-                  ),
-                  if (receipt.shopAddress != null && receipt.shopAddress!.isNotEmpty)
-                    pw.Center(
-                      child: pw.Text(
-                        receipt.shopAddress!,
-                        style: const pw.TextStyle(fontSize: 7.5),
-                        textAlign: pw.TextAlign.center,
+            return pw.Align(
+              alignment: pw.Alignment.topCenter,
+              child: pw.ConstrainedBox(
+                constraints: pw.BoxConstraints(maxWidth: is80mm ? 220 : 160),
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      // Shop Header
+                      pw.Center(
+                        child: pw.Text(
+                          receipt.shopName.toUpperCase(),
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: is80mm ? 12 : 10),
+                          textAlign: pw.TextAlign.center,
+                        ),
                       ),
-                    ),
-                  if (receipt.shopPhone != null && receipt.shopPhone!.isNotEmpty)
-                    pw.Center(
-                      child: pw.Text(
-                        'Tel: ${receipt.shopPhone!}',
-                        style: const pw.TextStyle(fontSize: 7.5),
-                        textAlign: pw.TextAlign.center,
-                      ),
-                    ),
-                  pw.Divider(thickness: 0.8, borderStyle: pw.BorderStyle.dashed),
-
-                  // Metadata
-                  _pdfTwoColumn('Inv:', receipt.orderNumber, is80mm),
-                  _pdfTwoColumn('Date:', dateFmt.format(receipt.orderDate.toLocal()), is80mm),
-                  _pdfTwoColumn('Cashier:', receipt.cashierName, is80mm),
-                  if (receipt.customerName != null && receipt.customerName!.isNotEmpty)
-                    _pdfTwoColumn('Customer:', receipt.customerName!, is80mm),
-                  pw.Divider(thickness: 0.5),
-
-                  // Items Header
-                  _pdfTwoColumn('ITEM x QTY', 'AMOUNT', is80mm, isBold: true),
-                  pw.Divider(thickness: 0.5),
-
-                  // Items List
-                  ...receipt.items.map((item) {
-                    return pw.Padding(
-                      padding: const pw.EdgeInsets.symmetric(vertical: 1.5),
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-                        children: [
-                          pw.Text(
-                            item.name,
-                            style: pw.TextStyle(fontSize: is80mm ? 9.0 : 8.0, fontWeight: pw.FontWeight.bold),
+                      if (receipt.shopAddress != null && receipt.shopAddress!.isNotEmpty)
+                        pw.Center(
+                          child: pw.Text(
+                            receipt.shopAddress!,
+                            style: const pw.TextStyle(fontSize: 7.5),
+                            textAlign: pw.TextAlign.center,
                           ),
-                          pw.Row(
-                            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        ),
+                      if (receipt.shopPhone != null && receipt.shopPhone!.isNotEmpty)
+                        pw.Center(
+                          child: pw.Text(
+                            'Tel: ${receipt.shopPhone!}',
+                            style: const pw.TextStyle(fontSize: 7.5),
+                            textAlign: pw.TextAlign.center,
+                          ),
+                        ),
+                      pw.Divider(thickness: 0.8, borderStyle: pw.BorderStyle.dashed),
+
+                      // Metadata
+                      _pdfTwoColumn('Inv:', receipt.orderNumber, is80mm),
+                      _pdfTwoColumn('Date:', dateFmt.format(receipt.orderDate.toLocal()), is80mm),
+                      _pdfTwoColumn('Cashier:', receipt.cashierName, is80mm),
+                      if (receipt.customerName != null && receipt.customerName!.isNotEmpty)
+                        _pdfTwoColumn('Customer:', receipt.customerName!, is80mm),
+                      pw.Divider(thickness: 0.5),
+
+                      // Items Header
+                      _pdfTwoColumn('ITEM x QTY', 'AMOUNT', is80mm, isBold: true),
+                      pw.Divider(thickness: 0.5),
+
+                      // Items List
+                      ...receipt.items.map((item) {
+                        return pw.Padding(
+                          padding: const pw.EdgeInsets.symmetric(vertical: 1.5),
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
                             children: [
-                              pw.Text('  ${item.quantity} x ${currencyFmt.format(item.unitPrice)}', style: const pw.TextStyle(fontSize: 7.5)),
-                              pw.Text('${currencyFmt.format(item.subtotal)} ${receipt.currency}', style: pw.TextStyle(fontSize: is80mm ? 8.5 : 7.5, fontWeight: pw.FontWeight.bold)),
+                              pw.Text(
+                                item.name,
+                                style: pw.TextStyle(fontSize: is80mm ? 9.0 : 8.0, fontWeight: pw.FontWeight.bold),
+                              ),
+                              pw.Row(
+                                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                                children: [
+                                  pw.Text('  ${item.quantity} x ${currencyFmt.format(item.unitPrice)}', style: const pw.TextStyle(fontSize: 7.5)),
+                                  pw.Text('${currencyFmt.format(item.subtotal)} ${receipt.currency}', style: pw.TextStyle(fontSize: is80mm ? 8.5 : 7.5, fontWeight: pw.FontWeight.bold)),
+                                ],
+                              ),
                             ],
                           ),
-                        ],
+                        );
+                      }),
+                      pw.Divider(thickness: 0.5),
+
+                      // Totals
+                      _pdfTwoColumn('Subtotal:', '${currencyFmt.format(receipt.subtotal)} ${receipt.currency}', is80mm),
+                      if (receipt.discount > 0)
+                        _pdfTwoColumn('Discount:', '-${currencyFmt.format(receipt.discount)} ${receipt.currency}', is80mm),
+                      if (receipt.tax > 0)
+                        _pdfTwoColumn('Tax:', '+${currencyFmt.format(receipt.tax)} ${receipt.currency}', is80mm),
+                      pw.Divider(thickness: 0.8),
+                      _pdfTwoColumn('TOTAL:', '${currencyFmt.format(receipt.totalAmount)} ${receipt.currency}', is80mm, isBold: true, fontSize: is80mm ? 10.5 : 9.0),
+                      pw.Divider(thickness: 0.8),
+
+                      // Payment mode
+                      _pdfTwoColumn('Payment Mode:', receipt.paymentMethod, is80mm),
+                      if (receipt.paymentMethod == 'CASH') ...[
+                        _pdfTwoColumn('Paid:', '${currencyFmt.format(receipt.tenderAmount)} ${receipt.currency}', is80mm),
+                        _pdfTwoColumn('Change Due:', '${currencyFmt.format(receipt.changeDue)} ${receipt.currency}', is80mm),
+                      ],
+                      pw.Divider(thickness: 0.5, borderStyle: pw.BorderStyle.dashed),
+
+                      // Footer
+                      pw.SizedBox(height: 3),
+                      pw.Center(
+                        child: pw.Text(
+                          'Thank You! Come Again',
+                          style: const pw.TextStyle(fontSize: 8),
+                          textAlign: pw.TextAlign.center,
+                        ),
                       ),
-                    );
-                  }),
-                  pw.Divider(thickness: 0.5),
-
-                  // Totals
-                  _pdfTwoColumn('Subtotal:', '${currencyFmt.format(receipt.subtotal)} ${receipt.currency}', is80mm),
-                  if (receipt.discount > 0)
-                    _pdfTwoColumn('Discount:', '-${currencyFmt.format(receipt.discount)} ${receipt.currency}', is80mm),
-                  if (receipt.tax > 0)
-                    _pdfTwoColumn('Tax:', '+${currencyFmt.format(receipt.tax)} ${receipt.currency}', is80mm),
-                  pw.Divider(thickness: 0.8),
-                  _pdfTwoColumn('TOTAL:', '${currencyFmt.format(receipt.totalAmount)} ${receipt.currency}', is80mm, isBold: true, fontSize: is80mm ? 10.5 : 9.0),
-                  pw.Divider(thickness: 0.8),
-
-                  // Payment mode
-                  _pdfTwoColumn('Payment Mode:', receipt.paymentMethod, is80mm),
-                  if (receipt.paymentMethod == 'CASH') ...[
-                    _pdfTwoColumn('Paid:', '${currencyFmt.format(receipt.tenderAmount)} ${receipt.currency}', is80mm),
-                    _pdfTwoColumn('Change Due:', '${currencyFmt.format(receipt.changeDue)} ${receipt.currency}', is80mm),
-                  ],
-                  pw.Divider(thickness: 0.5, borderStyle: pw.BorderStyle.dashed),
-
-                  // Footer
-                  pw.SizedBox(height: 3),
-                  pw.Center(
-                    child: pw.Text('Thank You! Come Again', style: const pw.TextStyle(fontSize: 8)),
+                      pw.SizedBox(height: 8),
+                    ],
                   ),
-                  pw.SizedBox(height: 8),
-                ],
+                ),
               ),
             );
           },
@@ -757,14 +855,20 @@ class SystemThermalPrinterService {
         pw.Page(
           pageFormat: pageFormat,
           build: (pw.Context context) {
-            return pw.Container(
-              padding: const pw.EdgeInsets.symmetric(vertical: 4),
-              child: pw.Text(
-                text,
-                style: pw.TextStyle(
-                  font: pw.Font.courier(),
-                  fontSize: is80mm ? 8.0 : 6.5,
-                  lineSpacing: 1.1,
+            return pw.Align(
+              alignment: pw.Alignment.topCenter,
+              child: pw.ConstrainedBox(
+                constraints: pw.BoxConstraints(maxWidth: is80mm ? 220 : 160),
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                  child: pw.Text(
+                    text,
+                    style: pw.TextStyle(
+                      font: pw.Font.courier(),
+                      fontSize: is80mm ? 8.0 : 6.5,
+                      lineSpacing: 1.1,
+                    ),
+                  ),
                 ),
               ),
             );
@@ -785,6 +889,12 @@ class SystemThermalPrinterService {
 
     if (config.selectedPrinterName != null && config.selectedPrinterName!.isNotEmpty) {
       target = printers.where((p) => p.name == config.selectedPrinterName || p.url == config.selectedPrinterName).firstOrNull;
+      if (target == null && config.connectionType == 'usb') {
+        return PrintResult(
+          success: false,
+          message: 'Selected printer "${config.selectedPrinterName}" not found or disconnected.',
+        );
+      }
     }
 
     if (target != null) {
@@ -812,7 +922,7 @@ class SystemThermalPrinterService {
       );
     }
 
-    // Spooler fallback
+    // Spooler fallback only
     final ok = await Printing.layoutPdf(
       onLayout: (_) async => pdfBytes,
       name: jobName,
@@ -860,6 +970,17 @@ class UniversalThermalPrinterService implements PrinterService {
       final builder = EscPosBuilder();
       final bytes = builder.buildReceipt(receipt, width: width);
       return NetworkThermalPrinterService.printBytes(config.ipAddress, config.port, bytes);
+    } else if (config.connectionType == 'bluetooth') {
+      if (config.selectedPrinterName == null || config.selectedPrinterName!.trim().isEmpty) {
+        return const PrintResult(
+          success: false,
+          message: 'No Bluetooth printer selected! Please select a paired Bluetooth printer in Settings.',
+        );
+      }
+      final width = config.paperSize == '80mm' ? 48 : 32;
+      final builder = EscPosBuilder();
+      final bytes = builder.buildReceipt(receipt, width: width);
+      return BluetoothThermalPrinterService.printBytes(config.selectedPrinterName!.trim(), Uint8List.fromList(bytes));
     } else {
       return SystemThermalPrinterService.printReceipt(receipt: receipt, config: config);
     }
@@ -872,6 +993,16 @@ class UniversalThermalPrinterService implements PrinterService {
       final builder = EscPosBuilder();
       final bytes = builder.buildRawText(text);
       return NetworkThermalPrinterService.printBytes(config.ipAddress, config.port, bytes);
+    } else if (config.connectionType == 'bluetooth') {
+      if (config.selectedPrinterName == null || config.selectedPrinterName!.trim().isEmpty) {
+        return const PrintResult(
+          success: false,
+          message: 'No Bluetooth printer selected! Please select a paired Bluetooth printer in Settings.',
+        );
+      }
+      final builder = EscPosBuilder();
+      final bytes = builder.buildRawText(text);
+      return BluetoothThermalPrinterService.printBytes(config.selectedPrinterName!.trim(), Uint8List.fromList(bytes));
     } else {
       return SystemThermalPrinterService.printRawText(text: text, config: config, jobName: jobName);
     }
@@ -882,12 +1013,20 @@ class UniversalThermalPrinterService implements PrinterService {
     final config = _ref.read(printerConfigProvider);
     if (config.connectionType == 'wifi') {
       return NetworkThermalPrinterService.testConnection(config.ipAddress, config.port);
+    } else if (config.connectionType == 'bluetooth') {
+      if (config.selectedPrinterName == null || config.selectedPrinterName!.trim().isEmpty) {
+        return const PrintResult(
+          success: false,
+          message: 'No Bluetooth printer selected! Please pair your printer in Android Settings and select it in Settings.',
+        );
+      }
+      return BluetoothThermalPrinterService.testConnection(config.selectedPrinterName!.trim());
     } else {
       final printers = await SystemThermalPrinterService.listPrinters();
       if (printers.isEmpty) {
         return const PrintResult(
           success: false,
-          message: 'No system/Bluetooth/USB printers detected. Please pair or plug in your printer.',
+          message: 'No system/USB printers detected. Please connect your printer.',
         );
       }
       final target = config.selectedPrinterName != null && config.selectedPrinterName!.isNotEmpty
@@ -900,8 +1039,8 @@ class UniversalThermalPrinterService implements PrinterService {
         );
       }
       return PrintResult(
-        success: true,
-        message: 'Found ${printers.length} printer(s): ${printers.map((p) => p.name).join(", ")}',
+        success: false,
+        message: 'Printer "${config.selectedPrinterName ?? 'Default'}" not found in system printers list.',
       );
     }
   }

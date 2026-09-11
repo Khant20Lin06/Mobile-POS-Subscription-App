@@ -21,6 +21,7 @@ import '../../subscription/widgets/plan_showcase_dialog.dart';
 import '../../inventory/widgets/category_management_dialog.dart';
 import '../../inventory/widgets/product_form_dialog.dart';
 import '../../../core/hardware/barcode_scan_service.dart';
+import '../widgets/barcode_scanner_modal.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -482,7 +483,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       decoration: InputDecoration(
         hintText: 'Search or Scan Barcode...',
         hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-        prefixIcon: const Icon(Icons.qr_code_scanner, color: Color(0xFF38BDF8), size: 18),
+        prefixIcon: IconButton(
+          icon: const Icon(Icons.qr_code_scanner, color: Color(0xFF38BDF8), size: 20),
+          tooltip: 'Scan Barcode',
+          onPressed: () => BarcodeScannerModal.show(context),
+        ),
         suffixIcon: _searchQuery.isNotEmpty
             ? IconButton(
                 icon: const Icon(Icons.clear, size: 16, color: Color(0xFF94A3B8)),
