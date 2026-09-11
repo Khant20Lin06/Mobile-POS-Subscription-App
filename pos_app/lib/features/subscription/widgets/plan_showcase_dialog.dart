@@ -227,17 +227,21 @@ class PlanShowcaseDialog extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             lang == AppLanguage.my
-                ? 'ဖုန်းနှင့် Tablet စက်များစွာ ချိတ်ဆက်ပြီး Cloud Delta Sync သုံးလိုသူများအတွက်'
-                : 'Real-time multi-device cloud delta sync & backup',
+                ? 'UOM, Promotion, Purchase, Warehouse နှင့် Offline Sync ပါဝင်သော အဆင့်မြင့်စနစ်'
+                : 'Complete retail & wholesale suite with offline sync',
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
           const Divider(color: Color(0xFF334155), height: 20),
-          _buildFeatureItem(lang == AppLanguage.my ? 'FREE စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in FREE plan, plus:'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'Real-time Cloud Delta Sync' : 'Real-time Cloud Delta Sync'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'ဖုန်း/Tablet စက်များစွာ ချိတ်ဆက်ရောင်းနိုင်ခြင်း' : 'Multi-device Live Syncing'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'နေ့စဉ် အလိုအလျောက် Cloud Backup' : 'Daily Automated Cloud Backup'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'အဝေးရောက် Web Dashboard ကြည့်ရှုခွင့်' : 'Remote Web Dashboard Access'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'Telegram Priority အကူအညီ' : 'Priority Support via Telegram'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'UOM (ယူနစ် အတိုင်းအတာ စီမံခန့်ခွဲမှု)' : 'UOM (Unit of Measure)'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Promotion (ပရိုမိုးရှင်း အစီအစဉ်များ)' : 'Promotion Management'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Purchase (အဝယ်စာရင်း & ပေးသွင်းသူများ)' : 'Purchase & Supplier Tracking'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Warehouse (ဂိုဒေါင် & စတော့ ထိန်းချုပ်မှု)' : 'Warehouse Stock Management'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Return (ကုန်ပစ္စည်း အဝင်/အထွက် ပြန်သွင်း)' : 'Sales & Purchase Returns'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Discount (ရာခိုင်နှုန်း & ငွေပမာဏ လျှော့စျေး)' : 'Discounts (% & Fixed)'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Loyalty (ဖောက်သည် Point & Loyalty စနစ်)' : 'Customer Loyalty & Rewards'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Price List (စျေးနှုန်းစာရင်း အဆင့်ဆင့်)' : 'Custom Price Lists'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Repost (စာရင်းပြန်ထုတ် & အဆင့်မြင့် အစီရင်ခံစာ)' : 'Repost & Advanced Reports'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Offline Sync (100% အော့ဖ်လိုင်း & Multi-Device Sync)' : 'Offline Sync & Multi-Device Sync'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
@@ -319,18 +323,19 @@ class PlanShowcaseDialog extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             lang == AppLanguage.my
-                ? 'ဆိုင်ခွဲများစွာ၊ ဗဟိုဂိုဒေါင်နှင့် စိတ်ကြိုက် ERP ချိတ်ဆက်လိုသော လုပ်ငန်းကြီးများအတွက်'
-                : 'Multi-branch retail chains & custom ERP integrations',
+                ? 'HR, CRM, Branch, AI Chat, Accounting နှင့် စိတ်ကြိုက် Enterprise စနစ်ကြီးများအတွက်'
+                : 'HR, CRM, Branches, AI Assistant, Accounting & Enterprise solutions',
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
           ),
           const Divider(color: Color(0xFF334155), height: 20),
-          _buildFeatureItem(lang == AppLanguage.my ? 'PRO စနစ်ပါ အင်္ဂါရပ်အားလုံး အပြည့်အစုံ' : 'Everything in PRO plan, plus:'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'ဆိုင်ခွဲအကန့်အသတ်မရှိ ကွင်းဆက်စနစ်' : 'Unlimited Store Chains & Branches'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'ဗဟိုဂိုဒေါင် & ဆိုင်ခွဲများ အပြန်အလှန် လွှဲပြောင်း' : 'Central Warehouse Stock Transfer'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် ERP / Accounting API Integration' : 'Custom ERP / API Integration'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် ဘောက်ချာဒီဇိုင်း & Logo အမှတ်တံဆိပ်' : 'Custom Thermal Receipt Branding'),
-          _buildFeatureItem(lang == AppLanguage.my ? 'သီးသန့် Database & Server Hosting' : 'Dedicated Database & Server'),
-          _buildFeatureItem(lang == AppLanguage.my ? '၂၄/၇ ဖုန်း & On-site အထူးဝန်ဆောင်မှု' : '24/7 Dedicated Support Agent'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'HR Management (ဝန်ထမ်းရေးရာ စီမံခန့်ခွဲမှု)' : 'HR Management'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'CRM Management (ဖောက်သည် ဆက်ဆံရေး စီမံခန့်ခွဲမှု)' : 'CRM Management'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Branch Management (ဆိုင်ခွဲများ ကွင်းဆက် စီမံမှု)' : 'Branch Management'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Administration (အဆင့်မြင့် စီမံခန့်ခွဲမှု & Permissions)' : 'Central Administration'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'AI Assistant Chat (အရောင်း & စတော့ AI အထောက်အကူ)' : 'AI Assistant Chat'),
+          _buildFeatureItem(lang == AppLanguage.my ? '24/7 Customer Service Bot (၂၄ နာရီ ဝန်ဆောင်မှု Bot)' : '24/7 Customer Service Bot'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'Accounting / Finance (ဘဏ္ဍာရေး & စာရင်းကိုင်စနစ်)' : 'Accounting / Finance'),
+          _buildFeatureItem(lang == AppLanguage.my ? 'စိတ်ကြိုက် Enterprise စနစ်များ (etc)' : 'Custom Enterprise Integrations & etc'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(

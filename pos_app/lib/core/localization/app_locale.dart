@@ -85,7 +85,7 @@ class AppTranslations {
     'plan_view_all': {'en': 'View All Plans', 'my': 'အစီအစဉ်များအားလုံး ကြည့်ရန်'},
     'plan_activate': {'en': 'Activate License', 'my': 'လိုင်စင်ရိုက်ထည့်မည်'},
     'plan_free_price': {'en': '0 MMK / Forever Free', 'my': 'အခမဲ့ / တစ်သက်တာ'},
-    'plan_pro_price': {'en': '15,000 MMK / Month', 'my': '၁၅,၀၀၀ ကျပ် / တစ်လ'},
+    'plan_pro_price': {'en': '200,000 MMK', 'my': '၂၀၀,၀၀၀ ကျပ်'},
     'plan_custom_price': {'en': 'Custom Quote', 'my': 'စိတ်ကြိုက်ညှိနှိုင်း'},
 
     // Settings
