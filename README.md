@@ -1,4 +1,4 @@
-# Mobile POS Subscription App (Offline-First + Cloud Sync)
+# DOT POS (Offline-First + Cloud Sync Subscription App)
 
 A modern, offline-first Mobile Point-of-Sale (POS) and Subscription application built with **Flutter** (Client) and **NestJS** (Cloud Backend), supporting Android phones, tablets, Sunmi/iMin POS terminals, and Windows desktop.
 

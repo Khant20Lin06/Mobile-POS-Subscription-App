@@ -20,7 +20,7 @@ class DatabaseSeeder {
       await db.into(db.shops).insert(
             ShopsCompanion.insert(
               id: shopId,
-              name: 'City Mart & Coffee POS',
+              name: 'DOT POS Store',
               phone: const Value('09-770001122'),
               address: const Value('No. 123, Bogyoke Road, Yangon'),
               currency: const Value('MMK'),

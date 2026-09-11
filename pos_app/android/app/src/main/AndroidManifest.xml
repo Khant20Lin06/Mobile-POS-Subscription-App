@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
 
     <application
-        android:label="Mobile POS"
+        android:label="DOT POS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
