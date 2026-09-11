@@ -31,6 +31,10 @@ pos_app/build/
 pos_app/.dart_tool/
 pos_app/.flutter-plugins
 pos_app/.flutter-plugins-dependencies
+*.apk
+*.aab
+release_builds/*.apk
+release_builds/*.aab
 
 # IDE & OS files
 .DS_Store
