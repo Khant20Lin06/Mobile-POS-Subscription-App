@@ -15,14 +15,15 @@ import 'category_form_dialog.dart';
 
 class ProductFormDialog extends ConsumerStatefulWidget {
   final Product? productToEdit;
+  final String? initialBarcode;
 
-  const ProductFormDialog({super.key, this.productToEdit});
+  const ProductFormDialog({super.key, this.productToEdit, this.initialBarcode});
 
-  static Future<bool?> show(BuildContext context, {Product? productToEdit}) {
+  static Future<bool?> show(BuildContext context, {Product? productToEdit, String? initialBarcode}) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => ProductFormDialog(productToEdit: productToEdit),
+      builder: (ctx) => ProductFormDialog(productToEdit: productToEdit, initialBarcode: initialBarcode),
     );
   }
 
@@ -52,7 +53,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
     super.initState();
     final p = widget.productToEdit;
     _nameController = TextEditingController(text: p?.name ?? '');
-    _barcodeController = TextEditingController(text: p?.barcode ?? '');
+    _barcodeController = TextEditingController(text: p?.barcode ?? widget.initialBarcode ?? '');
     _costPriceController = TextEditingController(text: p != null ? p.costPrice.toStringAsFixed(0) : '0');
     _sellingPriceController = TextEditingController(text: p != null ? p.sellingPrice.toStringAsFixed(0) : '0');
     _stockController = TextEditingController(text: p != null ? p.stockQuantity.toString() : '0');

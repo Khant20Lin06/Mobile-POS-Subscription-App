@@ -19,6 +19,8 @@ import '../../../core/widgets/app_header_logo.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../subscription/widgets/plan_showcase_dialog.dart';
 import '../../inventory/widgets/category_management_dialog.dart';
+import '../../inventory/widgets/product_form_dialog.dart';
+import '../../../core/hardware/barcode_scan_service.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -32,11 +34,21 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   final _searchController = TextEditingController();
   final _barcodeFocusNode = FocusNode();
   final _categoryScrollController = ScrollController();
+  late BarcodeScanGunListener _scanGunListener;
   String? _selectedCategoryId;
   String _searchQuery = '';
 
   @override
+  void initState() {
+    super.initState();
+    final config = ref.read(scanGunConfigProvider);
+    _scanGunListener = BarcodeScanGunListener(config: config);
+    _scanGunListener.start(_onBarcodeSubmitted);
+  }
+
+  @override
   void dispose() {
+    _scanGunListener.stop();
     _searchController.dispose();
     _barcodeFocusNode.dispose();
     _categoryScrollController.dispose();
@@ -55,19 +67,50 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       _searchController.clear();
       setState(() => _searchQuery = '');
       if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            duration: const Duration(seconds: 1),
-            content: Text('Scanned & Added "${product.name}" to cart!'),
+            backgroundColor: const Color(0xFF10B981),
+            duration: const Duration(seconds: 2),
+            content: Row(
+              children: [
+                const Icon(Icons.qr_code_scanner, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Scanned & Added "${product.name}" (${_currencyFormat.format(product.sellingPrice)} MMK) to cart!',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }
     } else {
+      BarcodeScanGunListener.playErrorBeep();
       if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.redAccent,
-            content: Text('No product found with barcode "$barcodeClean"'),
+            backgroundColor: const Color(0xFFEF4444),
+            duration: const Duration(seconds: 4),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text('No product found with barcode "$barcodeClean"'),
+                ),
+              ],
+            ),
+            action: SnackBarAction(
+              label: '+ Add Product',
+              textColor: Colors.white,
+              onPressed: () {
+                ProductFormDialog.show(context, initialBarcode: barcodeClean);
+              },
+            ),
           ),
         );
       }

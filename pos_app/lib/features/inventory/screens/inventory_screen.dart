@@ -11,6 +11,7 @@ import '../widgets/product_form_dialog.dart';
 import '../widgets/stock_adjustment_dialog.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../auth/widgets/admin_override_dialog.dart';
+import '../../../core/hardware/barcode_scan_service.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -21,6 +22,7 @@ class InventoryScreen extends ConsumerStatefulWidget {
 
 class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final _searchController = TextEditingController();
+  late BarcodeScanGunListener _scanGunListener;
   String _searchQuery = '';
   String? _selectedCategoryId;
   bool _filterLowStockOnly = false;
@@ -29,9 +31,96 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final _currencyFormat = NumberFormat('#,##0', 'en_US');
 
   @override
+  void initState() {
+    super.initState();
+    final config = ref.read(scanGunConfigProvider);
+    _scanGunListener = BarcodeScanGunListener(config: config);
+    _scanGunListener.start(_onBarcodeScanned);
+  }
+
+  @override
   void dispose() {
+    _scanGunListener.stop();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onBarcodeScanned(String barcode) async {
+    final barcodeClean = barcode.trim();
+    if (barcodeClean.isEmpty) return;
+
+    final productDao = ref.read(productDaoProvider);
+    final product = await productDao.getProductByBarcode(barcodeClean);
+
+    _searchController.text = barcodeClean;
+    setState(() => _searchQuery = barcodeClean);
+
+    if (!mounted) return;
+    if (product != null) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFF10B981),
+          duration: const Duration(seconds: 3),
+          content: Row(
+            children: [
+              const Icon(Icons.qr_code_scanner, color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Found "${product.name}" • Stock: ${product.stockQuantity} • ${_currencyFormat.format(product.sellingPrice)} MMK',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          action: SnackBarAction(
+            label: 'Stock In',
+            textColor: Colors.white,
+            onPressed: () {
+              StockAdjustmentDialog.show(context, product);
+            },
+          ),
+        ),
+      );
+    } else {
+      BarcodeScanGunListener.playErrorBeep();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xFFEF4444),
+          duration: const Duration(seconds: 4),
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Expanded(child: Text('Barcode not registered: "$barcodeClean"')),
+            ],
+          ),
+          action: SnackBarAction(
+            label: '+ Create',
+            textColor: Colors.white,
+            onPressed: () {
+              _openProductFormWithBarcode(barcodeClean);
+            },
+          ),
+        ),
+      );
+    }
+  }
+
+  void _openProductFormWithBarcode(String barcode) async {
+    final activeUser = ref.read(currentUserProvider);
+    if (activeUser?.role == 'cashier') {
+      final approved = await AdminOverrideDialog.requestApproval(
+        context,
+        actionTitle: 'Add New Product (Barcode: $barcode)',
+      );
+      if (!approved) return;
+    }
+    if (mounted) {
+      ProductFormDialog.show(context, initialBarcode: barcode);
+    }
   }
 
   void _openProductForm({Product? productToEdit}) async {
