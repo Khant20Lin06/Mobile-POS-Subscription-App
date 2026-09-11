@@ -431,17 +431,44 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                       icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF38BDF8), size: 18),
                       onPressed: () => CustomerStatementDialog.show(context, customer),
                     ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Edit',
-                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 18),
-                      onPressed: () => CustomerFormDialog.show(context, customerToEdit: customer),
-                    ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Delete',
-                      icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
-                      onPressed: () => _confirmDeleteCustomer(customer),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 20),
+                      tooltip: 'Actions',
+                      color: const Color(0xFF1E293B),
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: const BorderSide(color: Color(0xFF334155)),
+                      ),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          CustomerFormDialog.show(context, customerToEdit: customer);
+                        } else if (value == 'delete') {
+                          _confirmDeleteCustomer(customer);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
+                              SizedBox(width: 8),
+                              Text('Edit Customer', style: TextStyle(color: Colors.white, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                              SizedBox(width: 8),
+                              Text('Delete Customer', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -545,15 +572,44 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                     icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF38BDF8), size: 20),
                     onPressed: () => CustomerStatementDialog.show(context, customer),
                   ),
-                  IconButton(
-                    tooltip: 'Edit Profile',
-                    icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 18),
-                    onPressed: () => CustomerFormDialog.show(context, customerToEdit: customer),
-                  ),
-                  IconButton(
-                    tooltip: 'Delete',
-                    icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
-                    onPressed: () => _confirmDeleteCustomer(customer),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 22),
+                    tooltip: 'Actions',
+                    color: const Color(0xFF1E293B),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Color(0xFF334155)),
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        CustomerFormDialog.show(context, customerToEdit: customer);
+                      } else if (value == 'delete') {
+                        _confirmDeleteCustomer(customer);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
+                            SizedBox(width: 8),
+                            Text('Edit Customer', style: TextStyle(color: Colors.white, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                            SizedBox(width: 8),
+                            Text('Delete Customer', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

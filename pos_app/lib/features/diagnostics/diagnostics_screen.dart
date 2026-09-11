@@ -370,6 +370,7 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen>
               final db = ref.read(databaseProvider);
               final messenger = ScaffoldMessenger.of(context);
               await DatabaseSeeder.seedIfEmpty(db);
+              await DatabaseSeeder.seedExtraProductsIfFew(db);
               ref.invalidate(currentShopProvider);
               ref.invalidate(activeProductsStreamProvider);
               messenger.showSnackBar(

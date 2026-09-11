@@ -17,6 +17,7 @@ import '../widgets/shop_profile_dialog.dart';
 import '../widgets/printer_settings_dialog.dart';
 import '../widgets/scan_gun_settings_dialog.dart';
 import '../widgets/backup_restore_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -599,6 +600,69 @@ class SettingsScreen extends ConsumerWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                   onPressed: () => BackupRestoreDialog.show(context),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 10. Telegram Support & Community Card
+          _buildCard(
+            title: lang == AppLanguage.my ? 'Telegram နည်းပညာ အကူအညီနှင့် ဝန်ဆောင်မှု' : 'Telegram Support & Upgrades',
+            icon: Icons.support_agent,
+            iconColor: const Color(0xFF38BDF8),
+            child: Column(
+              children: [
+                _buildInfoRow(
+                  lang == AppLanguage.my ? 'တရားဝင် ချန်နယ်' : 'Official Channel',
+                  't.me/dotsoftwareservice',
+                ),
+                const Divider(color: Color(0xFF334155), height: 16),
+                _buildInfoRow(
+                  lang == AppLanguage.my ? 'တိုက်ရိုက် ဆက်သွယ်ရန်' : 'Direct Support',
+                  '@khantlin0000',
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0284C7),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(Icons.campaign, size: 16),
+                        label: const Text('Channel', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        onPressed: () async {
+                          final uri = Uri.parse('https://t.me/dotsoftwareservice');
+                          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                            await launchUrl(uri, mode: LaunchMode.platformDefault);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(Icons.chat, size: 16),
+                        label: const Text('Direct Chat', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        onPressed: () async {
+                          final uri = Uri.parse('https://t.me/khantlin0000');
+                          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                            await launchUrl(uri, mode: LaunchMode.platformDefault);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

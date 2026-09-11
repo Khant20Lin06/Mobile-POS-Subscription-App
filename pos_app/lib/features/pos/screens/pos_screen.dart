@@ -564,134 +564,92 @@ class _PosScreenState extends ConsumerState<PosScreen> {
 
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       color: const Color(0xFF1E293B),
       child: categoriesAsync.when(
         data: (categories) {
-          return Row(
+          return ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            physics: const BouncingScrollPhysics(),
             children: [
-              // Left Scroll Arrow for Desktop / Tablet
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                icon: const Icon(Icons.chevron_left, color: Color(0xFF94A3B8), size: 18),
-                tooltip: 'Scroll Left',
-                onPressed: () {
-                  if (_categoryScrollController.hasClients) {
-                    _categoryScrollController.animateTo(
-                      (_categoryScrollController.offset - 160).clamp(0.0, _categoryScrollController.position.maxScrollExtent),
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-              ),
-              Expanded(
-                child: Scrollbar(
-                  controller: _categoryScrollController,
-                  thumbVisibility: false,
-                  child: ListView(
-                    controller: _categoryScrollController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      // 1. All Items Chip
-                      FilterChip(
-                        selected: _selectedCategoryId == null,
-                        showCheckmark: false,
-                        avatar: Icon(
-                          Icons.apps,
-                          size: 16,
-                          color: _selectedCategoryId == null ? Colors.white : const Color(0xFF94A3B8),
-                        ),
-                        label: Text(
-                          AppTranslations.tr('pos_all_items', lang),
-                          style: TextStyle(
-                            color: _selectedCategoryId == null ? Colors.white : const Color(0xFF94A3B8),
-                            fontSize: 12,
-                            fontWeight: _selectedCategoryId == null ? FontWeight.bold : FontWeight.normal,
-                          ),
-                        ),
-                        backgroundColor: const Color(0xFF0F172A),
-                        selectedColor: const Color(0xFF2563EB),
-                        side: BorderSide(
-                          color: _selectedCategoryId == null ? const Color(0xFF3B82F6) : const Color(0xFF334155),
-                        ),
-                        onSelected: (_) => setState(() => _selectedCategoryId = null),
-                      ),
-                      const SizedBox(width: 8),
-
-                      // Dynamic Category Chips from Database
-                      ...categories.map((cat) {
-                        final isSelected = _selectedCategoryId == cat.id;
-                        Color catColor = const Color(0xFF3B82F6);
-                        if (cat.colorCode != null && cat.colorCode!.startsWith('#')) {
-                          try {
-                            catColor = Color(int.parse(cat.colorCode!.replaceFirst('#', '0xFF')));
-                          } catch (_) {}
-                        }
-
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            selected: isSelected,
-                            showCheckmark: false,
-                            avatar: CircleAvatar(
-                              radius: 6,
-                              backgroundColor: catColor,
-                            ),
-                            label: Text(
-                              cat.name,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : const Color(0xFF94A3B8),
-                                fontSize: 12,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                              ),
-                            ),
-                            backgroundColor: const Color(0xFF0F172A),
-                            selectedColor: const Color(0xFF2563EB),
-                            side: BorderSide(
-                              color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFF334155),
-                            ),
-                            onSelected: (_) {
-                              setState(() {
-                                _selectedCategoryId = isSelected ? null : cat.id;
-                              });
-                            },
-                          ),
-                        );
-                      }),
-
-                      // Manage Categories Shortcut Chip
-                      ActionChip(
-                        avatar: const Icon(Icons.tune, size: 14, color: Color(0xFF38BDF8)),
-                        label: Text(
-                          lang == AppLanguage.my ? '+ အမျိုးအစားများ' : '+ Manage',
-                          style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.w600),
-                        ),
-                        backgroundColor: const Color(0xFF0F172A),
-                        side: const BorderSide(color: Color(0xFF38BDF8), width: 0.8),
-                        onPressed: () => CategoryManagementDialog.show(context),
-                      ),
-                    ],
+              // 1. All Items Chip
+              FilterChip(
+                selected: _selectedCategoryId == null,
+                showCheckmark: false,
+                avatar: Icon(
+                  Icons.apps,
+                  size: 16,
+                  color: _selectedCategoryId == null ? Colors.white : const Color(0xFF94A3B8),
+                ),
+                label: Text(
+                  AppTranslations.tr('pos_all_items', lang),
+                  style: TextStyle(
+                    color: _selectedCategoryId == null ? Colors.white : const Color(0xFF94A3B8),
+                    fontSize: 12,
+                    fontWeight: _selectedCategoryId == null ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
+                backgroundColor: const Color(0xFF0F172A),
+                selectedColor: const Color(0xFF2563EB),
+                side: BorderSide(
+                  color: _selectedCategoryId == null ? const Color(0xFF3B82F6) : const Color(0xFF334155),
+                ),
+                onSelected: (_) => setState(() => _selectedCategoryId = null),
               ),
-              // Right Scroll Arrow for Desktop / Tablet
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
-                icon: const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 18),
-                tooltip: 'Scroll Right',
-                onPressed: () {
-                  if (_categoryScrollController.hasClients) {
-                    _categoryScrollController.animateTo(
-                      (_categoryScrollController.offset + 160).clamp(0.0, _categoryScrollController.position.maxScrollExtent),
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
+              const SizedBox(width: 8),
+
+              // Dynamic Category Chips from Database
+              ...categories.map((cat) {
+                final isSelected = _selectedCategoryId == cat.id;
+                Color catColor = const Color(0xFF3B82F6);
+                if (cat.colorCode != null && cat.colorCode!.startsWith('#')) {
+                  try {
+                    catColor = Color(int.parse(cat.colorCode!.replaceFirst('#', '0xFF')));
+                  } catch (_) {}
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    selected: isSelected,
+                    showCheckmark: false,
+                    avatar: CircleAvatar(
+                      radius: 6,
+                      backgroundColor: catColor,
+                    ),
+                    label: Text(
+                      cat.name,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    backgroundColor: const Color(0xFF0F172A),
+                    selectedColor: const Color(0xFF2563EB),
+                    side: BorderSide(
+                      color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFF334155),
+                    ),
+                    onSelected: (_) {
+                      setState(() {
+                        _selectedCategoryId = isSelected ? null : cat.id;
+                      });
+                    },
+                  ),
+                );
+              }),
+
+              // Manage Categories Shortcut Chip
+              ActionChip(
+                avatar: const Icon(Icons.tune, size: 14, color: Color(0xFF38BDF8)),
+                label: Text(
+                  lang == AppLanguage.my ? '+ အမျိုးအစားများ' : '+ Manage',
+                  style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.w600),
+                ),
+                backgroundColor: const Color(0xFF0F172A),
+                side: const BorderSide(color: Color(0xFF38BDF8), width: 0.8),
+                onPressed: () => CategoryManagementDialog.show(context),
               ),
             ],
           );

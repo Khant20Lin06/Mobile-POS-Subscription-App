@@ -12,6 +12,7 @@ void main() async {
   // Initialize SQLite database and seed demo data if empty
   final db = AppDatabase();
   await DatabaseSeeder.seedIfEmpty(db);
+  await DatabaseSeeder.seedExtraProductsIfFew(db);
 
   runApp(
     ProviderScope(

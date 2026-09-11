@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/providers/database_provider.dart';
 import '../../../core/localization/app_locale.dart';
@@ -138,10 +139,202 @@ class _PlanShowcaseDialogState extends ConsumerState<PlanShowcaseDialog> {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            _buildContactFooter(context, lang, shop?.id ?? ''),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildContactFooter(BuildContext context, AppLanguage lang, String shopId) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF38BDF8).withValues(alpha: 0.3)),
+      ),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        runSpacing: 6,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.support_agent, color: Color(0xFF38BDF8), size: 18),
+              const SizedBox(width: 6),
+              Text(
+                lang == AppLanguage.my ? 'အကူအညီနှင့် ဝယ်ယူရန် Telegram:' : 'Telegram Support & Sales:',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
+              ),
+            ],
+          ),
+          Wrap(
+            spacing: 8,
+            children: [
+              InkWell(
+                onTap: () => launchTelegramUrl('https://t.me/dotsoftwareservice'),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0284C7).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF0284C7)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.campaign, color: Color(0xFF38BDF8), size: 14),
+                      SizedBox(width: 4),
+                      Text(
+                        't.me/dotsoftwareservice',
+                        style: TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () => launchTelegramUrl('https://t.me/khantlin0000'),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF2563EB)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.chat, color: Color(0xFF60A5FA), size: 14),
+                      SizedBox(width: 4),
+                      Text(
+                        '@khantlin0000',
+                        style: TextStyle(color: Color(0xFF60A5FA), fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Future<void> launchTelegramUrl(String url) async {
+    final uri = Uri.parse(url);
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+    } catch (_) {}
+  }
+
+  void _showContactOptions(BuildContext context, String shopId, AppLanguage lang) {
+    if (shopId.isNotEmpty) {
+      Clipboard.setData(ClipboardData(text: shopId));
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF475569),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.send_rounded, color: Color(0xFF38BDF8), size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            lang == AppLanguage.my ? 'Telegram မှ ဆက်သွယ်ဝယ်ယူရန်' : 'Contact via Telegram',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          if (shopId.isNotEmpty)
+                            Text(
+                              lang == AppLanguage.my ? 'Shop ID ($shopId) ကို Copy ယူပြီးပါပြီ' : 'Shop ID ($shopId) copied to clipboard',
+                              style: const TextStyle(color: Color(0xFF10B981), fontSize: 11),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                // Button 1: Telegram Channel
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0284C7),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.campaign, size: 20),
+                  label: const Text('Telegram Channel: t.me/dotsoftwareservice', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    launchTelegramUrl('https://t.me/dotsoftwareservice');
+                  },
+                ),
+                const SizedBox(height: 10),
+                // Button 2: Direct Chat
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.chat, size: 20),
+                  label: const Text('Direct Chat: @khantlin0000', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    launchTelegramUrl('https://t.me/khantlin0000');
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _copyShopIdAndContact(BuildContext context, String shopId, AppLanguage lang) {
+    _showContactOptions(context, shopId, lang);
   }
 
   Widget _buildFreeCard(BuildContext context, WidgetRef ref, AppLanguage lang, {required bool isCurrent}) {
@@ -409,20 +602,6 @@ class _PlanShowcaseDialogState extends ConsumerState<PlanShowcaseDialog> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _copyShopIdAndContact(BuildContext context, String shopId, AppLanguage lang) {
-    Clipboard.setData(ClipboardData(text: shopId));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: const Color(0xFF2563EB),
-        content: Text(
-          lang == AppLanguage.my
-              ? 'Shop ID ($shopId) ကို Copy ယူပြီးပါပြီ။ Telegram: @khantlin0000 သို့ ဆက်သွယ်ပေးပါ။'
-              : 'Shop ID copied! Please contact Telegram: @khantlin0000',
-        ),
       ),
     );
   }

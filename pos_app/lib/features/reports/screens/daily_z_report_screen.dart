@@ -6,7 +6,16 @@ import 'package:intl/intl.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/hardware/thermal_receipt_service.dart';
 import '../../../core/providers/database_provider.dart';
+import '../../../core/localization/app_locale.dart';
 import '../../pos/widgets/receipt_dialog.dart';
+
+enum ReportPeriod {
+  today,
+  thisWeek,
+  thisMonth,
+  thisYear,
+  custom,
+}
 
 class DailyZReportScreen extends ConsumerStatefulWidget {
   const DailyZReportScreen({super.key});
@@ -19,6 +28,7 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
   final _currencyFormat = NumberFormat('#,##0', 'en_US');
   final _dateFormat = DateFormat('yyyy-MM-dd');
   late DateTime _selectedDate;
+  ReportPeriod _selectedPeriod = ReportPeriod.today;
 
   @override
   void initState() {
@@ -26,13 +36,57 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
     _selectedDate = DateTime.now();
   }
 
+  (DateTime start, DateTime end, String periodLabel) _getPeriodRange(AppLanguage lang) {
+    final now = DateTime.now();
+    switch (_selectedPeriod) {
+      case ReportPeriod.today:
+        final start = DateTime(now.year, now.month, now.day);
+        final end = start.add(const Duration(days: 1));
+        final label = lang == AppLanguage.my ? 'ဒီနေ့ (${_dateFormat.format(start)})' : 'Today (${_dateFormat.format(start)})';
+        return (start, end, label);
+
+      case ReportPeriod.thisWeek:
+        final weekday = now.weekday; // 1 = Mon, 7 = Sun
+        final start = DateTime(now.year, now.month, now.day).subtract(Duration(days: weekday - 1));
+        final end = start.add(const Duration(days: 7));
+        final endDisplay = end.subtract(const Duration(seconds: 1));
+        final label = lang == AppLanguage.my
+            ? 'ယခုအပတ် (${_dateFormat.format(start)} ~ ${_dateFormat.format(endDisplay)})'
+            : 'This Week (${_dateFormat.format(start)} ~ ${_dateFormat.format(endDisplay)})';
+        return (start, end, label);
+
+      case ReportPeriod.thisMonth:
+        final start = DateTime(now.year, now.month, 1);
+        final nextMonth = now.month == 12 ? DateTime(now.year + 1, 1, 1) : DateTime(now.year, now.month + 1, 1);
+        final label = lang == AppLanguage.my
+            ? 'ယခုလ (${DateFormat('MMMM yyyy').format(now)})'
+            : 'This Month (${DateFormat('MMMM yyyy').format(now)})';
+        return (start, nextMonth, label);
+
+      case ReportPeriod.thisYear:
+        final start = DateTime(now.year, 1, 1);
+        final nextYear = DateTime(now.year + 1, 1, 1);
+        final label = lang == AppLanguage.my ? 'ယခုနှစ် (${now.year})' : 'This Year (${now.year})';
+        return (start, nextYear, label);
+
+      case ReportPeriod.custom:
+        final start = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+        final end = start.add(const Duration(days: 1));
+        final label = '${_dateFormat.format(start)} (Custom)';
+        return (start, end, label);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final db = ref.watch(databaseProvider);
     final shopAsync = ref.watch(currentShopProvider);
+    final lang = ref.watch(appLanguageProvider);
 
-    final startOfDay = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final range = _getPeriodRange(lang);
+    final startRange = range.$1;
+    final endRange = range.$2;
+    final periodLabel = range.$3;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -50,56 +104,118 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
               child: const Icon(Icons.analytics_outlined, color: Color(0xFF10B981), size: 20),
             ),
             const SizedBox(width: 10),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Daily Z-Report',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                  lang == AppLanguage.my ? 'အရောင်းနှင့် Z-Report' : 'Sales & Z-Report',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
                 ),
                 Text(
-                  'End of Day Sales & Profit Audit',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                  periodLabel,
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF38BDF8), fontWeight: FontWeight.w500),
                 ),
               ],
             ),
           ],
         ),
         actions: [
-          // Date Selector Button
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white,
-              side: const BorderSide(color: Color(0xFF334155)),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          if (_selectedPeriod == ReportPeriod.custom)
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Color(0xFF38BDF8)),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              ),
+              icon: const Icon(Icons.calendar_today, size: 14, color: Color(0xFF38BDF8)),
+              label: Text(_dateFormat.format(_selectedDate), style: const TextStyle(fontSize: 12)),
+              onPressed: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime(2025),
+                  lastDate: DateTime(2030),
+                );
+                if (picked != null) {
+                  setState(() {
+                    _selectedDate = picked;
+                    _selectedPeriod = ReportPeriod.custom;
+                  });
+                }
+              },
             ),
-            icon: const Icon(Icons.calendar_today, size: 14, color: Color(0xFF38BDF8)),
-            label: Text(_dateFormat.format(_selectedDate), style: const TextStyle(fontSize: 12)),
-            onPressed: () async {
-              final picked = await showDatePicker(
-                context: context,
-                initialDate: _selectedDate,
-                firstDate: DateTime(2025),
-                lastDate: DateTime(2030),
-              );
-              if (picked != null) {
-                setState(() => _selectedDate = picked);
-              }
-            },
-          ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
         ],
       ),
-      body: FutureBuilder<List<Order>>(
-        future: (db.select(db.orders)
-              ..where((tbl) =>
-                  tbl.deletedAt.isNull() &
-                  tbl.status.equals('COMPLETED') &
-                  tbl.createdAt.isBiggerOrEqualValue(startOfDay) &
-                  tbl.createdAt.isSmallerThanValue(endOfDay))
-              ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
-            .get(),
-        builder: (context, snapshot) {
+      body: Column(
+        children: [
+          // Filter Tabs: Today, Week, Month, Year, Custom
+          Container(
+            height: 46,
+            color: const Color(0xFF1E293B),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              children: [
+                _buildPeriodFilterChip(
+                  label: lang == AppLanguage.my ? 'ဒီနေ့' : 'Today',
+                  period: ReportPeriod.today,
+                  icon: Icons.today,
+                ),
+                const SizedBox(width: 8),
+                _buildPeriodFilterChip(
+                  label: lang == AppLanguage.my ? 'ယခုအပတ်' : 'This Week',
+                  period: ReportPeriod.thisWeek,
+                  icon: Icons.date_range,
+                ),
+                const SizedBox(width: 8),
+                _buildPeriodFilterChip(
+                  label: lang == AppLanguage.my ? 'ယခုလ' : 'This Month',
+                  period: ReportPeriod.thisMonth,
+                  icon: Icons.calendar_month,
+                ),
+                const SizedBox(width: 8),
+                _buildPeriodFilterChip(
+                  label: lang == AppLanguage.my ? 'ယခုနှစ်' : 'This Year',
+                  period: ReportPeriod.thisYear,
+                  icon: Icons.calendar_view_month,
+                ),
+                const SizedBox(width: 8),
+                _buildPeriodFilterChip(
+                  label: lang == AppLanguage.my ? 'ရက်စွဲရွေးမည်' : 'Custom Date',
+                  period: ReportPeriod.custom,
+                  icon: Icons.edit_calendar,
+                  onCustomTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate,
+                      firstDate: DateTime(2025),
+                      lastDate: DateTime(2030),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _selectedDate = picked;
+                        _selectedPeriod = ReportPeriod.custom;
+                      });
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Main Report Content
+          Expanded(
+            child: FutureBuilder<List<Order>>(
+              future: (db.select(db.orders)
+                    ..where((tbl) =>
+                        tbl.deletedAt.isNull() &
+                        tbl.status.equals('COMPLETED') &
+                        tbl.createdAt.isBiggerOrEqualValue(startRange) &
+                        tbl.createdAt.isSmallerThanValue(endRange))
+                    ..orderBy([(t) => OrderingTerm(expression: t.createdAt, mode: OrderingMode.desc)]))
+                  .get(),
+              builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -184,9 +300,9 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   icon: const Icon(Icons.print, size: 20),
-                  label: const Text(
-                    'PRINT DAILY Z-REPORT SLIP',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  label: Text(
+                    lang == AppLanguage.my ? 'Z-REPORT ထုတ်မည် ($periodLabel)' : 'PRINT REPORT SLIP ($periodLabel)',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   onPressed: () => _printZReport(
                     context,
@@ -198,6 +314,8 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
                     waveTotal,
                     creditTotal,
                     totalDiscount,
+                    periodLabel,
+                    startRange,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -309,6 +427,9 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
           );
         },
       ),
+    ),
+  ],
+),
     );
   }
 
@@ -374,6 +495,44 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
     );
   }
 
+  Widget _buildPeriodFilterChip({
+    required String label,
+    required ReportPeriod period,
+    required IconData icon,
+    VoidCallback? onCustomTap,
+  }) {
+    final isSelected = _selectedPeriod == period;
+    return ChoiceChip(
+      selected: isSelected,
+      showCheckmark: false,
+      avatar: Icon(
+        icon,
+        size: 14,
+        color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+      ),
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontSize: 12,
+        ),
+      ),
+      backgroundColor: const Color(0xFF0F172A),
+      selectedColor: const Color(0xFF2563EB),
+      side: BorderSide(
+        color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFF334155),
+      ),
+      onSelected: (_) {
+        if (period == ReportPeriod.custom && onCustomTap != null) {
+          onCustomTap();
+        } else {
+          setState(() => _selectedPeriod = period);
+        }
+      },
+    );
+  }
+
   void _printZReport(
     BuildContext context,
     Shop? shop,
@@ -384,17 +543,19 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
     double wave,
     double credit,
     double discount,
+    String periodLabel,
+    DateTime reportDate,
   ) {
     // Generate Z-Report receipt representation
     final receipt = ReceiptData(
-      shopName: '${shop?.name ?? "My POS Store"} [DAILY Z-REPORT]',
+      shopName: '${shop?.name ?? "My POS Store"} [SALES Z-REPORT]',
       shopPhone: shop?.phone,
       shopAddress: shop?.address,
       currency: shop?.currency ?? 'MMK',
-      orderNumber: 'Z-${DateFormat('yyyyMMdd').format(_selectedDate)}',
+      orderNumber: 'Z-${DateFormat('yyyyMMdd').format(reportDate)}',
       orderDate: DateTime.now(),
       cashierName: 'Manager / Audit',
-      customerName: 'DAILY SUMMARY',
+      customerName: periodLabel.toUpperCase(),
       items: [
         ReceiptLineItem(name: 'Total Orders Placed', quantity: orders.length, unitPrice: 0, subtotal: 0),
         ReceiptLineItem(name: 'Cash In Drawer', quantity: 1, unitPrice: cash, subtotal: cash),
@@ -408,7 +569,7 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
       tenderAmount: cash,
       changeDue: 0.0,
       paymentMethod: 'MULTIPLE CHANNELS',
-      notes: 'Official End of Day Z-Report Audit Slip',
+      notes: 'Official Sales & Z-Report Audit Slip ($periodLabel)',
     );
 
     showDialog(

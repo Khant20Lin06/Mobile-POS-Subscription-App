@@ -539,17 +539,44 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       onPressed: () => StockAdjustmentDialog.show(context, product),
                     ),
                     const SizedBox(width: 4),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Edit Product',
-                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 18),
-                      onPressed: () => _openProductForm(productToEdit: product),
-                    ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Delete',
-                      icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
-                      onPressed: () => _confirmDeleteProduct(product),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 20),
+                      tooltip: 'Actions',
+                      color: const Color(0xFF1E293B),
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: const BorderSide(color: Color(0xFF334155)),
+                      ),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          _openProductForm(productToEdit: product);
+                        } else if (value == 'delete') {
+                          _confirmDeleteProduct(product);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
+                              SizedBox(width: 8),
+                              Text('Edit Product', style: TextStyle(color: Colors.white, fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                              SizedBox(width: 8),
+                              Text('Delete Product', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -703,18 +730,45 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     onPressed: () => StockAdjustmentDialog.show(context, product),
                   ),
 
-                  // Edit Product Button
-                  IconButton(
-                    tooltip: 'Edit Product',
-                    icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 20),
-                    onPressed: () => _openProductForm(productToEdit: product),
-                  ),
-
-                  // Delete Product Button
-                  IconButton(
-                    tooltip: 'Delete',
-                    icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
-                    onPressed: () => _confirmDeleteProduct(product),
+                  // 3-dot Actions Menu (Edit / Delete)
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 22),
+                    tooltip: 'Actions',
+                    color: const Color(0xFF1E293B),
+                    elevation: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Color(0xFF334155)),
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        _openProductForm(productToEdit: product);
+                      } else if (value == 'delete') {
+                        _confirmDeleteProduct(product);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
+                            SizedBox(width: 8),
+                            Text('Edit Product', style: TextStyle(color: Colors.white, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                            SizedBox(width: 8),
+                            Text('Delete Product', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
