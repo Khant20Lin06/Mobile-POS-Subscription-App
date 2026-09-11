@@ -503,7 +503,6 @@ class EscPosBuilder {
     }
     writeln('=' * width);
 
-    alignLeft();
     writeln(ThermalReceiptFormatter._twoColumns('Inv:', data.orderNumber, width));
     writeln(ThermalReceiptFormatter._twoColumns('Date:', ThermalReceiptFormatter._dateFormat.format(data.orderDate.toLocal()), width));
     writeln(ThermalReceiptFormatter._twoColumns('Cashier:', data.cashierName, width));
