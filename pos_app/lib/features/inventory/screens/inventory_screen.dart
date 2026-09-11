@@ -7,6 +7,8 @@ import '../../../core/providers/database_provider.dart';
 import '../widgets/category_form_dialog.dart';
 import '../widgets/product_form_dialog.dart';
 import '../widgets/stock_adjustment_dialog.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../auth/widgets/admin_override_dialog.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -30,7 +32,32 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     super.dispose();
   }
 
-  void _confirmDeleteProduct(Product product) {
+  void _openProductForm({Product? productToEdit}) async {
+    final activeUser = ref.read(currentUserProvider);
+    if (activeUser?.role == 'cashier') {
+      final approved = await AdminOverrideDialog.requestApproval(
+        context,
+        actionTitle: productToEdit != null ? 'Edit Product "${productToEdit.name}"' : 'Add New Product',
+      );
+      if (!approved) return;
+    }
+    if (mounted) {
+      ProductFormDialog.show(context, productToEdit: productToEdit);
+    }
+  }
+
+  void _confirmDeleteProduct(Product product) async {
+    final activeUser = ref.read(currentUserProvider);
+    if (activeUser?.role == 'cashier') {
+      final approved = await AdminOverrideDialog.requestApproval(
+        context,
+        actionTitle: 'Delete Product "${product.name}"',
+      );
+      if (!approved) return;
+    }
+
+    if (!mounted) return;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -100,7 +127,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 14),
             child: ElevatedButton.icon(
-              onPressed: () => ProductFormDialog.show(context),
+              onPressed: () => _openProductForm(),
               icon: const Icon(Icons.add, size: 18),
               label: const Text('+ Product'),
               style: ElevatedButton.styleFrom(
@@ -529,7 +556,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               IconButton(
                 tooltip: 'Edit Product',
                 icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 20),
-                onPressed: () => ProductFormDialog.show(context, productToEdit: product),
+                onPressed: () => _openProductForm(productToEdit: product),
               ),
 
               // Delete Product Button
@@ -571,7 +598,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () => ProductFormDialog.show(context),
+            onPressed: () => _openProductForm(),
             icon: const Icon(Icons.add, size: 18),
             label: const Text('Add New Product'),
             style: ElevatedButton.styleFrom(

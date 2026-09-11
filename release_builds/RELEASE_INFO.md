@@ -8,8 +8,8 @@
 
 | File Name | File Type | File Size | Description |
 | :--- | :--- | :--- | :--- |
-| **`DOT-POS-v1.0.0.aab`** | Android App Bundle | **47.5 MB** | **Google Play Console (Play Store)** ပေါ်သို့ တင်ရန် သီးသန့်ထုတ်ထားသော Production Bundle |
-| **`DOT-POS-v1.0.0.apk`** | Signed Release APK | **57.4 MB** | Android Phone, Tablet, Sunmi/iMin POS စက်များတွင် **Direct Install (Side-load)** လုပ်ရန် |
+| **`DOT-POS-v1.0.0.aab`** | Android App Bundle | **48.1 MB** | **Google Play Console (Play Store)** ပေါ်သို့ တင်ရန် သီးသန့်ထုတ်ထားသော Production Bundle |
+| **`DOT-POS-v1.0.0.apk`** | Signed Release APK | **59.1 MB** | Android Phone, Tablet, Sunmi/iMin POS စက်များတွင် **Direct Install (Side-load)** လုပ်ရန် |
 | **`playstore-512x512.png`** | 512x512 PNG Icon | **118 KB** | Google Play Console > Store Listing တွင် တင်ရန် **Official App Icon** |
 
 ---

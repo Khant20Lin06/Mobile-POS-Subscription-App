@@ -235,6 +235,81 @@ class ThermalReceiptFormatter {
     return buffer.toString();
   }
 
+  /// Format 58mm/80mm ESC/POS Shift Closing Slip (X-Report / Shift Audit)
+  static String formatShiftClosingSlip({
+    required String shopName,
+    String? shopPhone,
+    String? shopAddress,
+    required String shiftId,
+    required String cashierName,
+    required DateTime openedAt,
+    required DateTime closedAt,
+    required double openingFloat,
+    required double cashSales,
+    required double nonCashSales,
+    required double cashIn,
+    required double cashOut,
+    required double expectedCash,
+    required double actualCash,
+    required double difference,
+    String? notes,
+    int lineWidth = 32,
+  }) {
+    final buffer = StringBuffer();
+    final div = '=' * lineWidth;
+    final thinDiv = '-' * lineWidth;
+
+    buffer.writeln(_center(shopName.toUpperCase(), lineWidth));
+    if (shopPhone != null && shopPhone.isNotEmpty) {
+      buffer.writeln(_center('Tel: $shopPhone', lineWidth));
+    }
+    buffer.writeln(div);
+    buffer.writeln(_center('** SHIFT CLOSING SLIP **', lineWidth));
+    buffer.writeln(_center('(အဆိုင်းပိတ် ငွေစာရင်းရှင်းတမ်း)', lineWidth));
+    buffer.writeln(thinDiv);
+
+    buffer.writeln(_twoColumns('Shift #:', shiftId.length > 12 ? shiftId.substring(0, 12) : shiftId, lineWidth));
+    buffer.writeln(_twoColumns('Cashier:', cashierName, lineWidth));
+    buffer.writeln(_twoColumns('Opened:', _dateFormat.format(openedAt), lineWidth));
+    buffer.writeln(_twoColumns('Closed:', _dateFormat.format(closedAt), lineWidth));
+    buffer.writeln(thinDiv);
+
+    buffer.writeln(_twoColumns('Starting Float:', '${_currencyFormat.format(openingFloat)} MMK', lineWidth));
+    buffer.writeln(_twoColumns('Cash Sales (+):', '${_currencyFormat.format(cashSales)} MMK', lineWidth));
+    buffer.writeln(_twoColumns('Pay In / Cash (+):', '${_currencyFormat.format(cashIn)} MMK', lineWidth));
+    buffer.writeln(_twoColumns('Pay Out / Drop (-):', '${_currencyFormat.format(cashOut)} MMK', lineWidth));
+    buffer.writeln(thinDiv);
+    buffer.writeln(_twoColumns('EXPECTED IN DRAWER:', '${_currencyFormat.format(expectedCash)} MMK', lineWidth));
+    buffer.writeln(_twoColumns('ACTUAL COUNTED:', '${_currencyFormat.format(actualCash)} MMK', lineWidth));
+    buffer.writeln(thinDiv);
+
+    String diffLabel = 'BALANCED';
+    if (difference > 0) {
+      diffLabel = 'OVER (+${_currencyFormat.format(difference)})';
+    } else if (difference < 0) {
+      diffLabel = 'SHORT (${_currencyFormat.format(difference)})';
+    }
+    buffer.writeln(_twoColumns('DISCREPANCY:', diffLabel, lineWidth));
+    buffer.writeln(div);
+
+    buffer.writeln(_twoColumns('Digital / Non-Cash:', '${_currencyFormat.format(nonCashSales)} MMK', lineWidth));
+    final totalRevenue = cashSales + nonCashSales;
+    buffer.writeln(_twoColumns('Total Shift Revenue:', '${_currencyFormat.format(totalRevenue)} MMK', lineWidth));
+    buffer.writeln(thinDiv);
+
+    if (notes != null && notes.isNotEmpty) {
+      buffer.writeln('Audit Note: $notes');
+      buffer.writeln(thinDiv);
+    }
+
+    buffer.writeln('\n');
+    buffer.writeln(_twoColumns('Cashier Sign', 'Manager Sign', lineWidth));
+    buffer.writeln(_twoColumns('------------', '------------', lineWidth));
+    buffer.writeln('\n\n');
+
+    return buffer.toString();
+  }
+
   static String _center(String text, int width) {
     if (text.length >= width) return text;
     final leftPadding = (width - text.length) ~/ 2;

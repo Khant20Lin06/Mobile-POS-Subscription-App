@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../auth/providers/auth_provider.dart';
+import '../auth/widgets/admin_override_dialog.dart';
+import '../auth/widgets/pin_login_dialog.dart';
 import '../customers/screens/customers_screen.dart';
 import '../diagnostics/diagnostics_screen.dart';
 import '../inventory/screens/inventory_screen.dart';
 import '../pos/screens/pos_screen.dart';
 import '../reports/screens/daily_z_report_screen.dart';
 
-class AppShell extends StatefulWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   @override
-  State<AppShell> createState() => _AppShellState();
+  ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends ConsumerState<AppShell> {
   int _currentIndex = 0;
 
   final _screens = const [
@@ -23,9 +27,26 @@ class _AppShellState extends State<AppShell> {
     DiagnosticsScreen(),
   ];
 
+  void _onDestinationSelected(int idx) async {
+    final activeUser = ref.read(currentUserProvider);
+
+    // If cashier attempts to access Z-Report (3) or DB & Sync (4)
+    if (activeUser?.role == 'cashier' && (idx == 3 || idx == 4)) {
+      final approved = await AdminOverrideDialog.requestApproval(
+        context,
+        actionTitle: idx == 3 ? 'View Daily Z-Report' : 'Access Database & Sync Settings',
+      );
+      if (!approved) return;
+    }
+
+    setState(() => _currentIndex = idx);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
+    final isLocked = ref.watch(isTerminalLockedProvider);
+
+    Widget content = LayoutBuilder(
       builder: (context, constraints) {
         final isDesktopOrTablet = constraints.maxWidth >= 700;
 
@@ -37,7 +58,7 @@ class _AppShellState extends State<AppShell> {
                 NavigationRail(
                   backgroundColor: const Color(0xFF1E293B),
                   selectedIndex: _currentIndex,
-                  onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
+                  onDestinationSelected: _onDestinationSelected,
                   labelType: NavigationRailLabelType.all,
                   selectedIconTheme: const IconThemeData(color: Color(0xFF60A5FA)),
                   unselectedIconTheme: const IconThemeData(color: Color(0xFF94A3B8)),
@@ -110,7 +131,7 @@ class _AppShellState extends State<AppShell> {
               backgroundColor: const Color(0xFF1E293B),
               indicatorColor: const Color(0xFF2563EB).withValues(alpha: 0.3),
               selectedIndex: _currentIndex,
-              onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
+              onDestinationSelected: _onDestinationSelected,
               destinations: const [
                 NavigationDestination(
                   icon: Icon(Icons.point_of_sale_outlined, color: Color(0xFF94A3B8)),
@@ -143,5 +164,22 @@ class _AppShellState extends State<AppShell> {
         }
       },
     );
+
+    if (isLocked) {
+      return Stack(
+        children: [
+          content,
+          Positioned.fill(
+            child: Container(
+              color: const Color(0xFF0F172A).withValues(alpha: 0.96),
+              alignment: Alignment.center,
+              child: const PinLoginDialog(isLockScreen: true),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return content;
   }
 }

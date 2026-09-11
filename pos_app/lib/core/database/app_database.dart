@@ -8,10 +8,13 @@ import 'tables/customers_table.dart';
 import 'tables/customer_ledgers_table.dart';
 import 'tables/orders_table.dart';
 import 'tables/order_items_table.dart';
+import 'tables/shifts_table.dart';
 
 import 'daos/product_dao.dart';
 import 'daos/order_dao.dart';
 import 'daos/customer_dao.dart';
+import 'daos/user_dao.dart';
+import 'daos/shift_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -25,18 +28,21 @@ part 'app_database.g.dart';
     CustomerLedgers,
     Orders,
     OrderItems,
+    Shifts,
   ],
   daos: [
     ProductDao,
     OrderDao,
     CustomerDao,
+    UserDao,
+    ShiftDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -45,8 +51,11 @@ class AppDatabase extends _$AppDatabase {
         await m.createAll();
       },
       onUpgrade: (Migrator m, int from, int to) async {
-        // Schema migrations
+        if (from < 2) {
+          await m.createTable(shifts);
+        }
       },
     );
   }
 }
+

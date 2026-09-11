@@ -3,6 +3,8 @@ import '../database/app_database.dart';
 import '../database/daos/product_dao.dart';
 import '../database/daos/order_dao.dart';
 import '../database/daos/customer_dao.dart';
+import '../database/daos/user_dao.dart';
+import '../database/daos/shift_dao.dart';
 import '../sync/sync_service.dart';
 
 /// Singleton Database Provider
@@ -23,6 +25,14 @@ final orderDaoProvider = Provider<OrderDao>((ref) {
 
 final customerDaoProvider = Provider<CustomerDao>((ref) {
   return ref.watch(databaseProvider).customerDao;
+});
+
+final userDaoProvider = Provider<UserDao>((ref) {
+  return ref.watch(databaseProvider).userDao;
+});
+
+final shiftDaoProvider = Provider<ShiftDao>((ref) {
+  return ref.watch(databaseProvider).shiftDao;
 });
 
 /// Reactive Streams for UI
@@ -50,6 +60,12 @@ final categoriesStreamProvider = StreamProvider<List<Category>>((ref) {
   return ref.watch(productDaoProvider).watchCategories();
 });
 
+final activeShiftStreamProvider = StreamProvider<Shift?>((ref) {
+  final shop = ref.watch(currentShopProvider).value;
+  if (shop == null) return Stream.value(null);
+  return ref.watch(shiftDaoProvider).watchActiveShift(shop.id);
+});
+
 /// Shop & Subscription Information Provider
 final currentShopProvider = FutureProvider<Shop?>((ref) async {
   final db = ref.watch(databaseProvider);
@@ -65,8 +81,10 @@ final pendingSyncCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final oCount = await (db.select(db.orders)..where((t) => t.syncStatus.equals('pending'))).get();
   final cCount = await (db.select(db.customers)..where((t) => t.syncStatus.equals('pending'))).get();
   final lCount = await (db.select(db.customerLedgers)..where((t) => t.syncStatus.equals('pending'))).get();
+  final sCount = await (db.select(db.shifts)..where((t) => t.syncStatus.equals('pending'))).get();
+  final uCount = await (db.select(db.users)..where((t) => t.syncStatus.equals('pending'))).get();
 
-  count = pCount.length + oCount.length + cCount.length + lCount.length;
+  count = pCount.length + oCount.length + cCount.length + lCount.length + sCount.length + uCount.length;
   return count;
 });
 
@@ -75,3 +93,4 @@ final syncServiceProvider = Provider<SyncService>((ref) {
   final db = ref.watch(databaseProvider);
   return SyncService(db: db);
 });
+

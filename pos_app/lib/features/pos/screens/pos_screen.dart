@@ -6,6 +6,14 @@ import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/cart_panel.dart';
+import '../../auth/providers/auth_provider.dart';
+import '../../auth/widgets/admin_override_dialog.dart';
+import '../../auth/widgets/pin_login_dialog.dart';
+import '../../auth/widgets/staff_management_dialog.dart';
+import '../../shifts/widgets/open_shift_dialog.dart';
+import '../../shifts/widgets/shift_drawer_dialog.dart';
+import '../../shifts/widgets/close_shift_dialog.dart';
+import '../widgets/receipt_dialog.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -64,6 +72,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final shopAsync = ref.watch(currentShopProvider);
     final productsAsync = ref.watch(activeProductsStreamProvider);
     final cart = ref.watch(cartProvider);
+    final activeUser = ref.watch(currentUserProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -81,29 +90,36 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               child: const Icon(Icons.storefront, color: Color(0xFF60A5FA), size: 20),
             ),
             const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                shopAsync.when(
-                  data: (shop) => Text(
-                    shop?.name ?? 'POS Register',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  shopAsync.when(
+                    data: (shop) => Text(
+                      shop?.name ?? 'POS Register',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    loading: () => const Text('Loading...', style: TextStyle(fontSize: 16)),
+                    error: (e, stack) => const Text('POS Register', style: TextStyle(fontSize: 16)),
                   ),
-                  loading: () => const Text('Loading...', style: TextStyle(fontSize: 16)),
-                  error: (e, stack) => const Text('POS Register', style: TextStyle(fontSize: 16)),
-                ),
-                const Text(
-                  'Cashier: Ko Cashier (Online)',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF10B981)),
-                ),
-              ],
+                  Text(
+                    'Cashier: ${activeUser?.name ?? "Cashier"} (${activeUser?.role ?? "Active"})',
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF10B981)),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
           // Barcode & Fast Search Field
           Container(
-            width: 260,
+            width: 200,
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             child: TextField(
               controller: _searchController,
@@ -193,6 +209,185 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       ),
                     ),
                   ],
+                ),
+              );
+            },
+          ),
+          // Shift Status Chip
+          Consumer(
+            builder: (context, ref, _) {
+              final shiftAsync = ref.watch(activeShiftStreamProvider);
+              final shift = shiftAsync.value;
+              final isOpen = shift != null;
+
+              return InkWell(
+                onTap: () async {
+                  if (isOpen) {
+                    final toClose = await ShiftDrawerDialog.show(context);
+                    if (toClose != null && context.mounted) {
+                      final slip = await CloseShiftDialog.show(context, toClose);
+                      if (slip != null && context.mounted) {
+                        ReceiptDialog.show(
+                          context,
+                          receiptText: slip,
+                          title: 'Shift Closed & Audited!',
+                          orderNumber: 'SHIFT-${toClose.id.substring(0, 8)}',
+                        );
+                      }
+                    }
+                  } else {
+                    OpenShiftDialog.show(context);
+                  }
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isOpen
+                        ? const Color(0xFF10B981).withValues(alpha: 0.15)
+                        : const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                    border: Border.all(
+                      color: isOpen ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isOpen ? Icons.point_of_sale : Icons.lock_clock,
+                        color: isOpen ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                        size: 13,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        isOpen ? 'Drawer: ${_currencyFormat.format(shift.expectedCash)}' : 'Open Shift',
+                        style: TextStyle(
+                          color: isOpen ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          // Cashier Profile & Lock Dropdown
+          Consumer(
+            builder: (context, ref, _) {
+              final activeUser = ref.watch(currentUserProvider);
+              final isOwner = activeUser?.role == 'owner';
+
+              return PopupMenuButton<String>(
+                tooltip: 'Cashier Profile & Security',
+                offset: const Offset(0, 45),
+                color: const Color(0xFF1E293B),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                onSelected: (value) async {
+                  if (value == 'lock') {
+                    ref.read(isTerminalLockedProvider.notifier).state = true;
+                    PinLoginDialog.show(context, isLockScreen: true);
+                  } else if (value == 'switch') {
+                    PinLoginDialog.show(context);
+                  } else if (value == 'staff') {
+                    if (activeUser?.role == 'cashier') {
+                      final approved = await AdminOverrideDialog.requestApproval(
+                        context,
+                        actionTitle: 'Manage Staff Directory',
+                      );
+                      if (!approved) return;
+                    }
+                    if (context.mounted) {
+                      StaffManagementDialog.show(context);
+                    }
+                  }
+                },
+                itemBuilder: (ctx) => [
+                  PopupMenuItem(
+                    value: 'header',
+                    enabled: false,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          activeUser?.name ?? 'Unknown Cashier',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        Text(
+                          activeUser?.role.toUpperCase() ?? 'CASHIER',
+                          style: TextStyle(
+                            color: isOwner ? const Color(0xFFF59E0B) : const Color(0xFF60A5FA),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(height: 1),
+                  const PopupMenuItem(
+                    value: 'lock',
+                    child: Row(
+                      children: [
+                        Icon(Icons.lock_outline, color: Color(0xFFEF4444), size: 18),
+                        SizedBox(width: 8),
+                        Text('Lock Terminal (သော့ခတ်မည်)', style: TextStyle(color: Colors.white, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'switch',
+                    child: Row(
+                      children: [
+                        Icon(Icons.switch_account_outlined, color: Color(0xFF60A5FA), size: 18),
+                        SizedBox(width: 8),
+                        Text('Switch Cashier (ကက်ရှာပြောင်းမည်)', style: TextStyle(color: Colors.white, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'staff',
+                    child: Row(
+                      children: [
+                        Icon(Icons.people_outline, color: Color(0xFF10B981), size: 18),
+                        SizedBox(width: 8),
+                        Text('Staff Management (ဝန်ထမ်းစာရင်း)', style: TextStyle(color: Colors.white, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ],
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF334155)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleAvatar(
+                        radius: 12,
+                        backgroundColor: isOwner ? const Color(0xFFF59E0B) : const Color(0xFF2563EB),
+                        child: Text(
+                          activeUser != null && activeUser.name.isNotEmpty
+                              ? activeUser.name.substring(0, 1).toUpperCase()
+                              : 'C',
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        activeUser?.name ?? 'Cashier',
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8), size: 18),
+                    ],
+                  ),
                 ),
               );
             },

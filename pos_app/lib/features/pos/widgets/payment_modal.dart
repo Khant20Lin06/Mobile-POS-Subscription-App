@@ -9,6 +9,7 @@ import '../../../core/hardware/thermal_receipt_service.dart';
 import '../../../core/providers/database_provider.dart';
 import '../providers/cart_provider.dart';
 import 'receipt_dialog.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class PaymentModal extends ConsumerStatefulWidget {
   const PaymentModal({super.key});
@@ -377,11 +378,14 @@ class _PaymentModalState extends ConsumerState<PaymentModal> {
         );
       }).toList();
 
+      final activeUser = ref.read(currentUserProvider);
+
       // 2. Insert Order + Decrement Stock in ACID Transaction
       await orderDao.createOrderWithItems(
         orderEntry: OrdersCompanion.insert(
           id: orderId,
           shopId: shopId,
+          userId: drift.Value(activeUser?.id),
           customerId: drift.Value(cart.selectedCustomer?.id),
           orderNumber: invoiceNumber,
           subtotal: cart.subtotal,
@@ -416,7 +420,18 @@ class _PaymentModalState extends ConsumerState<PaymentModal> {
         );
       }
 
-      // 4. Build Receipt Data Model
+      // 4. Update active shift drawer sales
+      final activeShift = await ref.read(shiftDaoProvider).getActiveShift(shopId);
+      if (activeShift != null) {
+        final isCash = _selectedMethod == 'CASH';
+        await ref.read(shiftDaoProvider).recordOrderSale(
+          shiftId: activeShift.id,
+          cashAmount: isCash ? cart.totalAmount : 0.0,
+          nonCashAmount: isCash ? 0.0 : cart.totalAmount,
+        );
+      }
+
+      // 5. Build Receipt Data Model
       final receipt = ReceiptData(
         shopName: shop?.name ?? 'My POS Store',
         shopPhone: shop?.phone,
@@ -424,7 +439,7 @@ class _PaymentModalState extends ConsumerState<PaymentModal> {
         currency: shop?.currency ?? 'MMK',
         orderNumber: invoiceNumber,
         orderDate: DateTime.now(),
-        cashierName: 'Cashier',
+        cashierName: activeUser?.name ?? 'Cashier',
         customerName: cart.selectedCustomer?.name,
         items: cart.items.map((ci) {
           return ReceiptLineItem(

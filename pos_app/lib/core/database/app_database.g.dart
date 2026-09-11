@@ -5666,6 +5666,1052 @@ class OrderItemsCompanion extends UpdateCompanion<OrderItem> {
   }
 }
 
+class $ShiftsTable extends Shifts with TableInfo<$ShiftsTable, Shift> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShiftsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _shopIdMeta = const VerificationMeta('shopId');
+  @override
+  late final GeneratedColumn<String> shopId = GeneratedColumn<String>(
+    'shop_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _openedAtMeta = const VerificationMeta(
+    'openedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> openedAt = GeneratedColumn<DateTime>(
+    'opened_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _openingCashFloatMeta = const VerificationMeta(
+    'openingCashFloat',
+  );
+  @override
+  late final GeneratedColumn<double> openingCashFloat = GeneratedColumn<double>(
+    'opening_cash_float',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _cashSalesMeta = const VerificationMeta(
+    'cashSales',
+  );
+  @override
+  late final GeneratedColumn<double> cashSales = GeneratedColumn<double>(
+    'cash_sales',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _nonCashSalesMeta = const VerificationMeta(
+    'nonCashSales',
+  );
+  @override
+  late final GeneratedColumn<double> nonCashSales = GeneratedColumn<double>(
+    'non_cash_sales',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _cashInMeta = const VerificationMeta('cashIn');
+  @override
+  late final GeneratedColumn<double> cashIn = GeneratedColumn<double>(
+    'cash_in',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _cashOutMeta = const VerificationMeta(
+    'cashOut',
+  );
+  @override
+  late final GeneratedColumn<double> cashOut = GeneratedColumn<double>(
+    'cash_out',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _expectedCashMeta = const VerificationMeta(
+    'expectedCash',
+  );
+  @override
+  late final GeneratedColumn<double> expectedCash = GeneratedColumn<double>(
+    'expected_cash',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _actualCashMeta = const VerificationMeta(
+    'actualCash',
+  );
+  @override
+  late final GeneratedColumn<double> actualCash = GeneratedColumn<double>(
+    'actual_cash',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _differenceMeta = const VerificationMeta(
+    'difference',
+  );
+  @override
+  late final GeneratedColumn<double> difference = GeneratedColumn<double>(
+    'difference',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('OPEN'),
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    syncStatus,
+    shopId,
+    userId,
+    openedAt,
+    closedAt,
+    openingCashFloat,
+    cashSales,
+    nonCashSales,
+    cashIn,
+    cashOut,
+    expectedCash,
+    actualCash,
+    difference,
+    status,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shifts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Shift> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    if (data.containsKey('shop_id')) {
+      context.handle(
+        _shopIdMeta,
+        shopId.isAcceptableOrUnknown(data['shop_id']!, _shopIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_shopIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('opened_at')) {
+      context.handle(
+        _openedAtMeta,
+        openedAt.isAcceptableOrUnknown(data['opened_at']!, _openedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_openedAtMeta);
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    }
+    if (data.containsKey('opening_cash_float')) {
+      context.handle(
+        _openingCashFloatMeta,
+        openingCashFloat.isAcceptableOrUnknown(
+          data['opening_cash_float']!,
+          _openingCashFloatMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cash_sales')) {
+      context.handle(
+        _cashSalesMeta,
+        cashSales.isAcceptableOrUnknown(data['cash_sales']!, _cashSalesMeta),
+      );
+    }
+    if (data.containsKey('non_cash_sales')) {
+      context.handle(
+        _nonCashSalesMeta,
+        nonCashSales.isAcceptableOrUnknown(
+          data['non_cash_sales']!,
+          _nonCashSalesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('cash_in')) {
+      context.handle(
+        _cashInMeta,
+        cashIn.isAcceptableOrUnknown(data['cash_in']!, _cashInMeta),
+      );
+    }
+    if (data.containsKey('cash_out')) {
+      context.handle(
+        _cashOutMeta,
+        cashOut.isAcceptableOrUnknown(data['cash_out']!, _cashOutMeta),
+      );
+    }
+    if (data.containsKey('expected_cash')) {
+      context.handle(
+        _expectedCashMeta,
+        expectedCash.isAcceptableOrUnknown(
+          data['expected_cash']!,
+          _expectedCashMeta,
+        ),
+      );
+    }
+    if (data.containsKey('actual_cash')) {
+      context.handle(
+        _actualCashMeta,
+        actualCash.isAcceptableOrUnknown(data['actual_cash']!, _actualCashMeta),
+      );
+    }
+    if (data.containsKey('difference')) {
+      context.handle(
+        _differenceMeta,
+        difference.isAcceptableOrUnknown(data['difference']!, _differenceMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Shift map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Shift(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      shopId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shop_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      openedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}opened_at'],
+      )!,
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      ),
+      openingCashFloat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}opening_cash_float'],
+      )!,
+      cashSales: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cash_sales'],
+      )!,
+      nonCashSales: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}non_cash_sales'],
+      )!,
+      cashIn: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cash_in'],
+      )!,
+      cashOut: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}cash_out'],
+      )!,
+      expectedCash: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}expected_cash'],
+      )!,
+      actualCash: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}actual_cash'],
+      ),
+      difference: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}difference'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+    );
+  }
+
+  @override
+  $ShiftsTable createAlias(String alias) {
+    return $ShiftsTable(attachedDatabase, alias);
+  }
+}
+
+class Shift extends DataClass implements Insertable<Shift> {
+  /// UUID v4 generated on the client
+  final String id;
+
+  /// Creation timestamp in UTC
+  final DateTime createdAt;
+
+  /// Last updated timestamp in UTC (used for incremental delta sync)
+  final DateTime updatedAt;
+
+  /// Soft deletion timestamp. If not null, the item is deleted.
+  final DateTime? deletedAt;
+
+  /// Sync status: 'pending' (needs upload to NestJS) or 'synced' (in sync with cloud)
+  final String syncStatus;
+  final String shopId;
+  final String userId;
+  final DateTime openedAt;
+  final DateTime? closedAt;
+  final double openingCashFloat;
+  final double cashSales;
+  final double nonCashSales;
+  final double cashIn;
+  final double cashOut;
+  final double expectedCash;
+  final double? actualCash;
+  final double? difference;
+
+  /// Status: 'OPEN', 'CLOSED'
+  final String status;
+  final String? notes;
+  const Shift({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.syncStatus,
+    required this.shopId,
+    required this.userId,
+    required this.openedAt,
+    this.closedAt,
+    required this.openingCashFloat,
+    required this.cashSales,
+    required this.nonCashSales,
+    required this.cashIn,
+    required this.cashOut,
+    required this.expectedCash,
+    this.actualCash,
+    this.difference,
+    required this.status,
+    this.notes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['shop_id'] = Variable<String>(shopId);
+    map['user_id'] = Variable<String>(userId);
+    map['opened_at'] = Variable<DateTime>(openedAt);
+    if (!nullToAbsent || closedAt != null) {
+      map['closed_at'] = Variable<DateTime>(closedAt);
+    }
+    map['opening_cash_float'] = Variable<double>(openingCashFloat);
+    map['cash_sales'] = Variable<double>(cashSales);
+    map['non_cash_sales'] = Variable<double>(nonCashSales);
+    map['cash_in'] = Variable<double>(cashIn);
+    map['cash_out'] = Variable<double>(cashOut);
+    map['expected_cash'] = Variable<double>(expectedCash);
+    if (!nullToAbsent || actualCash != null) {
+      map['actual_cash'] = Variable<double>(actualCash);
+    }
+    if (!nullToAbsent || difference != null) {
+      map['difference'] = Variable<double>(difference);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  ShiftsCompanion toCompanion(bool nullToAbsent) {
+    return ShiftsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      syncStatus: Value(syncStatus),
+      shopId: Value(shopId),
+      userId: Value(userId),
+      openedAt: Value(openedAt),
+      closedAt: closedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedAt),
+      openingCashFloat: Value(openingCashFloat),
+      cashSales: Value(cashSales),
+      nonCashSales: Value(nonCashSales),
+      cashIn: Value(cashIn),
+      cashOut: Value(cashOut),
+      expectedCash: Value(expectedCash),
+      actualCash: actualCash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(actualCash),
+      difference: difference == null && nullToAbsent
+          ? const Value.absent()
+          : Value(difference),
+      status: Value(status),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+    );
+  }
+
+  factory Shift.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Shift(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      shopId: serializer.fromJson<String>(json['shopId']),
+      userId: serializer.fromJson<String>(json['userId']),
+      openedAt: serializer.fromJson<DateTime>(json['openedAt']),
+      closedAt: serializer.fromJson<DateTime?>(json['closedAt']),
+      openingCashFloat: serializer.fromJson<double>(json['openingCashFloat']),
+      cashSales: serializer.fromJson<double>(json['cashSales']),
+      nonCashSales: serializer.fromJson<double>(json['nonCashSales']),
+      cashIn: serializer.fromJson<double>(json['cashIn']),
+      cashOut: serializer.fromJson<double>(json['cashOut']),
+      expectedCash: serializer.fromJson<double>(json['expectedCash']),
+      actualCash: serializer.fromJson<double?>(json['actualCash']),
+      difference: serializer.fromJson<double?>(json['difference']),
+      status: serializer.fromJson<String>(json['status']),
+      notes: serializer.fromJson<String?>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'shopId': serializer.toJson<String>(shopId),
+      'userId': serializer.toJson<String>(userId),
+      'openedAt': serializer.toJson<DateTime>(openedAt),
+      'closedAt': serializer.toJson<DateTime?>(closedAt),
+      'openingCashFloat': serializer.toJson<double>(openingCashFloat),
+      'cashSales': serializer.toJson<double>(cashSales),
+      'nonCashSales': serializer.toJson<double>(nonCashSales),
+      'cashIn': serializer.toJson<double>(cashIn),
+      'cashOut': serializer.toJson<double>(cashOut),
+      'expectedCash': serializer.toJson<double>(expectedCash),
+      'actualCash': serializer.toJson<double?>(actualCash),
+      'difference': serializer.toJson<double?>(difference),
+      'status': serializer.toJson<String>(status),
+      'notes': serializer.toJson<String?>(notes),
+    };
+  }
+
+  Shift copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? syncStatus,
+    String? shopId,
+    String? userId,
+    DateTime? openedAt,
+    Value<DateTime?> closedAt = const Value.absent(),
+    double? openingCashFloat,
+    double? cashSales,
+    double? nonCashSales,
+    double? cashIn,
+    double? cashOut,
+    double? expectedCash,
+    Value<double?> actualCash = const Value.absent(),
+    Value<double?> difference = const Value.absent(),
+    String? status,
+    Value<String?> notes = const Value.absent(),
+  }) => Shift(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+    shopId: shopId ?? this.shopId,
+    userId: userId ?? this.userId,
+    openedAt: openedAt ?? this.openedAt,
+    closedAt: closedAt.present ? closedAt.value : this.closedAt,
+    openingCashFloat: openingCashFloat ?? this.openingCashFloat,
+    cashSales: cashSales ?? this.cashSales,
+    nonCashSales: nonCashSales ?? this.nonCashSales,
+    cashIn: cashIn ?? this.cashIn,
+    cashOut: cashOut ?? this.cashOut,
+    expectedCash: expectedCash ?? this.expectedCash,
+    actualCash: actualCash.present ? actualCash.value : this.actualCash,
+    difference: difference.present ? difference.value : this.difference,
+    status: status ?? this.status,
+    notes: notes.present ? notes.value : this.notes,
+  );
+  Shift copyWithCompanion(ShiftsCompanion data) {
+    return Shift(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      shopId: data.shopId.present ? data.shopId.value : this.shopId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      openedAt: data.openedAt.present ? data.openedAt.value : this.openedAt,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+      openingCashFloat: data.openingCashFloat.present
+          ? data.openingCashFloat.value
+          : this.openingCashFloat,
+      cashSales: data.cashSales.present ? data.cashSales.value : this.cashSales,
+      nonCashSales: data.nonCashSales.present
+          ? data.nonCashSales.value
+          : this.nonCashSales,
+      cashIn: data.cashIn.present ? data.cashIn.value : this.cashIn,
+      cashOut: data.cashOut.present ? data.cashOut.value : this.cashOut,
+      expectedCash: data.expectedCash.present
+          ? data.expectedCash.value
+          : this.expectedCash,
+      actualCash: data.actualCash.present
+          ? data.actualCash.value
+          : this.actualCash,
+      difference: data.difference.present
+          ? data.difference.value
+          : this.difference,
+      status: data.status.present ? data.status.value : this.status,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Shift(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('shopId: $shopId, ')
+          ..write('userId: $userId, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('openingCashFloat: $openingCashFloat, ')
+          ..write('cashSales: $cashSales, ')
+          ..write('nonCashSales: $nonCashSales, ')
+          ..write('cashIn: $cashIn, ')
+          ..write('cashOut: $cashOut, ')
+          ..write('expectedCash: $expectedCash, ')
+          ..write('actualCash: $actualCash, ')
+          ..write('difference: $difference, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    syncStatus,
+    shopId,
+    userId,
+    openedAt,
+    closedAt,
+    openingCashFloat,
+    cashSales,
+    nonCashSales,
+    cashIn,
+    cashOut,
+    expectedCash,
+    actualCash,
+    difference,
+    status,
+    notes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Shift &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.syncStatus == this.syncStatus &&
+          other.shopId == this.shopId &&
+          other.userId == this.userId &&
+          other.openedAt == this.openedAt &&
+          other.closedAt == this.closedAt &&
+          other.openingCashFloat == this.openingCashFloat &&
+          other.cashSales == this.cashSales &&
+          other.nonCashSales == this.nonCashSales &&
+          other.cashIn == this.cashIn &&
+          other.cashOut == this.cashOut &&
+          other.expectedCash == this.expectedCash &&
+          other.actualCash == this.actualCash &&
+          other.difference == this.difference &&
+          other.status == this.status &&
+          other.notes == this.notes);
+}
+
+class ShiftsCompanion extends UpdateCompanion<Shift> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> syncStatus;
+  final Value<String> shopId;
+  final Value<String> userId;
+  final Value<DateTime> openedAt;
+  final Value<DateTime?> closedAt;
+  final Value<double> openingCashFloat;
+  final Value<double> cashSales;
+  final Value<double> nonCashSales;
+  final Value<double> cashIn;
+  final Value<double> cashOut;
+  final Value<double> expectedCash;
+  final Value<double?> actualCash;
+  final Value<double?> difference;
+  final Value<String> status;
+  final Value<String?> notes;
+  final Value<int> rowid;
+  const ShiftsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.shopId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.openedAt = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.openingCashFloat = const Value.absent(),
+    this.cashSales = const Value.absent(),
+    this.nonCashSales = const Value.absent(),
+    this.cashIn = const Value.absent(),
+    this.cashOut = const Value.absent(),
+    this.expectedCash = const Value.absent(),
+    this.actualCash = const Value.absent(),
+    this.difference = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShiftsCompanion.insert({
+    required String id,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    required String shopId,
+    required String userId,
+    required DateTime openedAt,
+    this.closedAt = const Value.absent(),
+    this.openingCashFloat = const Value.absent(),
+    this.cashSales = const Value.absent(),
+    this.nonCashSales = const Value.absent(),
+    this.cashIn = const Value.absent(),
+    this.cashOut = const Value.absent(),
+    this.expectedCash = const Value.absent(),
+    this.actualCash = const Value.absent(),
+    this.difference = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       shopId = Value(shopId),
+       userId = Value(userId),
+       openedAt = Value(openedAt);
+  static Insertable<Shift> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? syncStatus,
+    Expression<String>? shopId,
+    Expression<String>? userId,
+    Expression<DateTime>? openedAt,
+    Expression<DateTime>? closedAt,
+    Expression<double>? openingCashFloat,
+    Expression<double>? cashSales,
+    Expression<double>? nonCashSales,
+    Expression<double>? cashIn,
+    Expression<double>? cashOut,
+    Expression<double>? expectedCash,
+    Expression<double>? actualCash,
+    Expression<double>? difference,
+    Expression<String>? status,
+    Expression<String>? notes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (shopId != null) 'shop_id': shopId,
+      if (userId != null) 'user_id': userId,
+      if (openedAt != null) 'opened_at': openedAt,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (openingCashFloat != null) 'opening_cash_float': openingCashFloat,
+      if (cashSales != null) 'cash_sales': cashSales,
+      if (nonCashSales != null) 'non_cash_sales': nonCashSales,
+      if (cashIn != null) 'cash_in': cashIn,
+      if (cashOut != null) 'cash_out': cashOut,
+      if (expectedCash != null) 'expected_cash': expectedCash,
+      if (actualCash != null) 'actual_cash': actualCash,
+      if (difference != null) 'difference': difference,
+      if (status != null) 'status': status,
+      if (notes != null) 'notes': notes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShiftsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? syncStatus,
+    Value<String>? shopId,
+    Value<String>? userId,
+    Value<DateTime>? openedAt,
+    Value<DateTime?>? closedAt,
+    Value<double>? openingCashFloat,
+    Value<double>? cashSales,
+    Value<double>? nonCashSales,
+    Value<double>? cashIn,
+    Value<double>? cashOut,
+    Value<double>? expectedCash,
+    Value<double?>? actualCash,
+    Value<double?>? difference,
+    Value<String>? status,
+    Value<String?>? notes,
+    Value<int>? rowid,
+  }) {
+    return ShiftsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      shopId: shopId ?? this.shopId,
+      userId: userId ?? this.userId,
+      openedAt: openedAt ?? this.openedAt,
+      closedAt: closedAt ?? this.closedAt,
+      openingCashFloat: openingCashFloat ?? this.openingCashFloat,
+      cashSales: cashSales ?? this.cashSales,
+      nonCashSales: nonCashSales ?? this.nonCashSales,
+      cashIn: cashIn ?? this.cashIn,
+      cashOut: cashOut ?? this.cashOut,
+      expectedCash: expectedCash ?? this.expectedCash,
+      actualCash: actualCash ?? this.actualCash,
+      difference: difference ?? this.difference,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (shopId.present) {
+      map['shop_id'] = Variable<String>(shopId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (openedAt.present) {
+      map['opened_at'] = Variable<DateTime>(openedAt.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (openingCashFloat.present) {
+      map['opening_cash_float'] = Variable<double>(openingCashFloat.value);
+    }
+    if (cashSales.present) {
+      map['cash_sales'] = Variable<double>(cashSales.value);
+    }
+    if (nonCashSales.present) {
+      map['non_cash_sales'] = Variable<double>(nonCashSales.value);
+    }
+    if (cashIn.present) {
+      map['cash_in'] = Variable<double>(cashIn.value);
+    }
+    if (cashOut.present) {
+      map['cash_out'] = Variable<double>(cashOut.value);
+    }
+    if (expectedCash.present) {
+      map['expected_cash'] = Variable<double>(expectedCash.value);
+    }
+    if (actualCash.present) {
+      map['actual_cash'] = Variable<double>(actualCash.value);
+    }
+    if (difference.present) {
+      map['difference'] = Variable<double>(difference.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShiftsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('shopId: $shopId, ')
+          ..write('userId: $userId, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('openingCashFloat: $openingCashFloat, ')
+          ..write('cashSales: $cashSales, ')
+          ..write('nonCashSales: $nonCashSales, ')
+          ..write('cashIn: $cashIn, ')
+          ..write('cashOut: $cashOut, ')
+          ..write('expectedCash: $expectedCash, ')
+          ..write('actualCash: $actualCash, ')
+          ..write('difference: $difference, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5679,9 +6725,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $OrdersTable orders = $OrdersTable(this);
   late final $OrderItemsTable orderItems = $OrderItemsTable(this);
+  late final $ShiftsTable shifts = $ShiftsTable(this);
   late final ProductDao productDao = ProductDao(this as AppDatabase);
   late final OrderDao orderDao = OrderDao(this as AppDatabase);
   late final CustomerDao customerDao = CustomerDao(this as AppDatabase);
+  late final UserDao userDao = UserDao(this as AppDatabase);
+  late final ShiftDao shiftDao = ShiftDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5695,6 +6744,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     customerLedgers,
     orders,
     orderItems,
+    shifts,
   ];
 }
 
@@ -8331,6 +9381,478 @@ typedef $$OrderItemsTableProcessedTableManager =
       OrderItem,
       PrefetchHooks Function()
     >;
+typedef $$ShiftsTableCreateCompanionBuilder =
+    ShiftsCompanion Function({
+      required String id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> syncStatus,
+      required String shopId,
+      required String userId,
+      required DateTime openedAt,
+      Value<DateTime?> closedAt,
+      Value<double> openingCashFloat,
+      Value<double> cashSales,
+      Value<double> nonCashSales,
+      Value<double> cashIn,
+      Value<double> cashOut,
+      Value<double> expectedCash,
+      Value<double?> actualCash,
+      Value<double?> difference,
+      Value<String> status,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+typedef $$ShiftsTableUpdateCompanionBuilder =
+    ShiftsCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> syncStatus,
+      Value<String> shopId,
+      Value<String> userId,
+      Value<DateTime> openedAt,
+      Value<DateTime?> closedAt,
+      Value<double> openingCashFloat,
+      Value<double> cashSales,
+      Value<double> nonCashSales,
+      Value<double> cashIn,
+      Value<double> cashOut,
+      Value<double> expectedCash,
+      Value<double?> actualCash,
+      Value<double?> difference,
+      Value<String> status,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+
+class $$ShiftsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShiftsTable> {
+  $$ShiftsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get openingCashFloat => $composableBuilder(
+    column: $table.openingCashFloat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cashSales => $composableBuilder(
+    column: $table.cashSales,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get nonCashSales => $composableBuilder(
+    column: $table.nonCashSales,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cashIn => $composableBuilder(
+    column: $table.cashIn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get cashOut => $composableBuilder(
+    column: $table.cashOut,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get expectedCash => $composableBuilder(
+    column: $table.expectedCash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get actualCash => $composableBuilder(
+    column: $table.actualCash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get difference => $composableBuilder(
+    column: $table.difference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ShiftsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShiftsTable> {
+  $$ShiftsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shopId => $composableBuilder(
+    column: $table.shopId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get openingCashFloat => $composableBuilder(
+    column: $table.openingCashFloat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cashSales => $composableBuilder(
+    column: $table.cashSales,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get nonCashSales => $composableBuilder(
+    column: $table.nonCashSales,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cashIn => $composableBuilder(
+    column: $table.cashIn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get cashOut => $composableBuilder(
+    column: $table.cashOut,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get expectedCash => $composableBuilder(
+    column: $table.expectedCash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get actualCash => $composableBuilder(
+    column: $table.actualCash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get difference => $composableBuilder(
+    column: $table.difference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ShiftsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShiftsTable> {
+  $$ShiftsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get shopId =>
+      $composableBuilder(column: $table.shopId, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get openedAt =>
+      $composableBuilder(column: $table.openedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  GeneratedColumn<double> get openingCashFloat => $composableBuilder(
+    column: $table.openingCashFloat,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get cashSales =>
+      $composableBuilder(column: $table.cashSales, builder: (column) => column);
+
+  GeneratedColumn<double> get nonCashSales => $composableBuilder(
+    column: $table.nonCashSales,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get cashIn =>
+      $composableBuilder(column: $table.cashIn, builder: (column) => column);
+
+  GeneratedColumn<double> get cashOut =>
+      $composableBuilder(column: $table.cashOut, builder: (column) => column);
+
+  GeneratedColumn<double> get expectedCash => $composableBuilder(
+    column: $table.expectedCash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get actualCash => $composableBuilder(
+    column: $table.actualCash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get difference => $composableBuilder(
+    column: $table.difference,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$ShiftsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ShiftsTable,
+          Shift,
+          $$ShiftsTableFilterComposer,
+          $$ShiftsTableOrderingComposer,
+          $$ShiftsTableAnnotationComposer,
+          $$ShiftsTableCreateCompanionBuilder,
+          $$ShiftsTableUpdateCompanionBuilder,
+          (Shift, BaseReferences<_$AppDatabase, $ShiftsTable, Shift>),
+          Shift,
+          PrefetchHooks Function()
+        > {
+  $$ShiftsTableTableManager(_$AppDatabase db, $ShiftsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShiftsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShiftsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShiftsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<String> shopId = const Value.absent(),
+                Value<String> userId = const Value.absent(),
+                Value<DateTime> openedAt = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<double> openingCashFloat = const Value.absent(),
+                Value<double> cashSales = const Value.absent(),
+                Value<double> nonCashSales = const Value.absent(),
+                Value<double> cashIn = const Value.absent(),
+                Value<double> cashOut = const Value.absent(),
+                Value<double> expectedCash = const Value.absent(),
+                Value<double?> actualCash = const Value.absent(),
+                Value<double?> difference = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShiftsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                syncStatus: syncStatus,
+                shopId: shopId,
+                userId: userId,
+                openedAt: openedAt,
+                closedAt: closedAt,
+                openingCashFloat: openingCashFloat,
+                cashSales: cashSales,
+                nonCashSales: nonCashSales,
+                cashIn: cashIn,
+                cashOut: cashOut,
+                expectedCash: expectedCash,
+                actualCash: actualCash,
+                difference: difference,
+                status: status,
+                notes: notes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                required String shopId,
+                required String userId,
+                required DateTime openedAt,
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<double> openingCashFloat = const Value.absent(),
+                Value<double> cashSales = const Value.absent(),
+                Value<double> nonCashSales = const Value.absent(),
+                Value<double> cashIn = const Value.absent(),
+                Value<double> cashOut = const Value.absent(),
+                Value<double> expectedCash = const Value.absent(),
+                Value<double?> actualCash = const Value.absent(),
+                Value<double?> difference = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShiftsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                syncStatus: syncStatus,
+                shopId: shopId,
+                userId: userId,
+                openedAt: openedAt,
+                closedAt: closedAt,
+                openingCashFloat: openingCashFloat,
+                cashSales: cashSales,
+                nonCashSales: nonCashSales,
+                cashIn: cashIn,
+                cashOut: cashOut,
+                expectedCash: expectedCash,
+                actualCash: actualCash,
+                difference: difference,
+                status: status,
+                notes: notes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ShiftsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ShiftsTable,
+      Shift,
+      $$ShiftsTableFilterComposer,
+      $$ShiftsTableOrderingComposer,
+      $$ShiftsTableAnnotationComposer,
+      $$ShiftsTableCreateCompanionBuilder,
+      $$ShiftsTableUpdateCompanionBuilder,
+      (Shift, BaseReferences<_$AppDatabase, $ShiftsTable, Shift>),
+      Shift,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8351,4 +9873,6 @@ class $AppDatabaseManager {
       $$OrdersTableTableManager(_db, _db.orders);
   $$OrderItemsTableTableManager get orderItems =>
       $$OrderItemsTableTableManager(_db, _db.orderItems);
+  $$ShiftsTableTableManager get shifts =>
+      $$ShiftsTableTableManager(_db, _db.shifts);
 }
