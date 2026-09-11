@@ -35,6 +35,7 @@ pos_app/.flutter-plugins-dependencies
 *.aab
 release_builds/*.apk
 release_builds/*.aab
+release_builds/DOT-POS-Windows-x64-v1.0.0/
 
 # IDE & OS files
 .DS_Store

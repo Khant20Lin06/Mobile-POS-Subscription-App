@@ -463,6 +463,12 @@ class _PaymentModalState extends ConsumerState<PaymentModal> {
       ref.read(cartProvider.notifier).clearCart();
       ref.invalidate(pendingSyncCountProvider);
 
+      // Auto-print receipt if enabled in settings
+      final printerConfig = ref.read(printerConfigProvider);
+      if (printerConfig.autoPrint) {
+        ref.read(printerServiceProvider).printReceipt(receipt).ignore();
+      }
+
       if (!context.mounted) return;
 
       Navigator.pop(context); // Close Payment Modal

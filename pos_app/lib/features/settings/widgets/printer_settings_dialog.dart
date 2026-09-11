@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:printing/printing.dart';
 
 import '../../../core/localization/app_locale.dart';
 import '../../../core/providers/database_provider.dart';
@@ -21,12 +22,32 @@ class PrinterSettingsDialog extends ConsumerStatefulWidget {
 }
 
 class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
-  String _connectionType = 'bluetooth'; // 'bluetooth', 'wifi', 'usb', 'builtin'
-  String _paperSize = '58mm'; // '58mm', '80mm'
-  bool _autoPrint = true;
-  final _ipController = TextEditingController(text: '192.168.1.100');
-  final _portController = TextEditingController(text: '9100');
-  final _printerNameController = TextEditingController(text: 'MTP-II (Bluetooth)');
+  late String _connectionType;
+  late String _paperSize;
+  late bool _autoPrint;
+  late TextEditingController _ipController;
+  late TextEditingController _portController;
+  late TextEditingController _printerNameController;
+
+  List<Printer> _availablePrinters = [];
+  bool _isScanning = false;
+  bool _isTestingConnection = false;
+  String? _connectionTestResult;
+  bool? _connectionTestSuccess;
+  bool _isSendingTestPrint = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final config = ref.read(printerConfigProvider);
+    _connectionType = config.connectionType;
+    _paperSize = config.paperSize;
+    _autoPrint = config.autoPrint;
+    _ipController = TextEditingController(text: config.ipAddress);
+    _portController = TextEditingController(text: config.port.toString());
+    _printerNameController = TextEditingController(text: config.selectedPrinterName ?? '');
+    _scanPrinters();
+  }
 
   @override
   void dispose() {
@@ -36,12 +57,66 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
     super.dispose();
   }
 
-  void _handleTestPrint() {
+  Future<void> _scanPrinters() async {
+    setState(() => _isScanning = true);
+    try {
+      final list = await SystemThermalPrinterService.listPrinters();
+      if (mounted) {
+        setState(() {
+          _availablePrinters = list;
+          if (_printerNameController.text.trim().isEmpty && list.isNotEmpty) {
+            final defaultPrinter = list.where((p) => p.isDefault).firstOrNull ?? list.first;
+            _printerNameController.text = defaultPrinter.name;
+          }
+        });
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) {
+        setState(() => _isScanning = false);
+      }
+    }
+  }
+
+  Future<void> _testWifiConnection() async {
+    setState(() {
+      _isTestingConnection = true;
+      _connectionTestResult = null;
+      _connectionTestSuccess = null;
+    });
+
+    final ip = _ipController.text.trim();
+    final port = int.tryParse(_portController.text.trim()) ?? 9100;
+    final result = await NetworkThermalPrinterService.testConnection(ip, port);
+
+    if (mounted) {
+      setState(() {
+        _isTestingConnection = false;
+        _connectionTestSuccess = result.success;
+        _connectionTestResult = result.message;
+      });
+    }
+  }
+
+  PrinterConfig _buildCurrentConfig() {
+    return PrinterConfig(
+      connectionType: _connectionType,
+      paperSize: _paperSize,
+      ipAddress: _ipController.text.trim().isEmpty ? '192.168.1.100' : _ipController.text.trim(),
+      port: int.tryParse(_portController.text.trim()) ?? 9100,
+      selectedPrinterName: _printerNameController.text.trim().isNotEmpty
+          ? _printerNameController.text.trim()
+          : null,
+      autoPrint: _autoPrint,
+    );
+  }
+
+  ReceiptData _generateTestReceipt() {
     final shop = ref.read(currentShopProvider).value;
     final shopName = shop?.name ?? 'DOT POS Store';
     final now = DateTime.now();
 
-    final testReceipt = ReceiptData(
+    return ReceiptData(
       shopName: shopName,
       shopAddress: shop?.address ?? 'No. 123, Bogyoke Road, Yangon',
       shopPhone: shop?.phone ?? '09-770001122',
@@ -49,7 +124,7 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
       orderNumber: 'TEST-001',
       orderDate: now,
       cashierName: 'Admin',
-      customerName: 'TEST RUN',
+      customerName: 'HARDWARE TEST',
       items: const [
         ReceiptLineItem(name: 'Test Item (Coffee)', quantity: 1, unitPrice: 3500.0, subtotal: 3500.0),
         ReceiptLineItem(name: 'Test Item (Water)', quantity: 2, unitPrice: 1000.0, subtotal: 2000.0),
@@ -61,14 +136,84 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
       tenderAmount: 6000.0,
       changeDue: 500.0,
       paymentMethod: 'CASH (TEST)',
-      notes: 'Thermal Connection Tested OK!',
+      notes: 'Thermal Printer Hardware Connected OK!',
     );
+  }
 
+  Future<void> _handleDirectTestPrint() async {
+    if (_isSendingTestPrint) return;
+
+    setState(() => _isSendingTestPrint = true);
+    final currentConfig = _buildCurrentConfig();
+
+    // Temporarily persist config so printer service picks up current settings
+    await ref.read(printerConfigProvider.notifier).updateConfig(currentConfig);
+
+    try {
+      final receipt = _generateTestReceipt();
+      final result = await ref.read(printerServiceProvider).printReceipt(receipt);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: result.success ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+          content: Row(
+            children: [
+              Icon(result.success ? Icons.check_circle : Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  result.message,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFFEF4444),
+            content: Text('Test Print Failed: ${e.toString()}'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSendingTestPrint = false);
+      }
+    }
+  }
+
+  void _handlePreviewTestSlip() {
+    final receipt = _generateTestReceipt();
     ReceiptDialog.show(
       context,
-      receipt: testReceipt,
+      receipt: receipt,
       title: 'Printer Test Slip (${_paperSize.toUpperCase()})',
       orderNumber: 'TEST-001',
+    );
+  }
+
+  Future<void> _handleSave() async {
+    final config = _buildCurrentConfig();
+    await ref.read(printerConfigProvider.notifier).updateConfig(config);
+
+    if (!mounted) return;
+    Navigator.pop(context);
+    final lang = ref.read(appLanguageProvider);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF10B981),
+        content: Text(
+          lang == AppLanguage.my
+              ? 'ပရင်တာ ဆက်တင်များ အောင်မြင်စွာ မှတ်သားပြီးပါပြီ'
+              : 'Printer settings saved successfully!',
+        ),
+      ),
     );
   }
 
@@ -80,7 +225,7 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
       backgroundColor: const Color(0xFF1E293B),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 460),
+        constraints: const BoxConstraints(maxWidth: 480),
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child: Column(
@@ -101,7 +246,7 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      lang == AppLanguage.my ? 'ပရင်တာ ချိတ်ဆက်မှု ဆက်တင်' : 'Thermal Printer Setup',
+                      lang == AppLanguage.my ? 'ပရင်တာ ချိတ်ဆက်မှု ဆက်တင်' : 'Thermal Printer Hardware Setup',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -152,18 +297,6 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                     onSelected: (_) => setState(() => _connectionType = 'wifi'),
                   ),
                   ChoiceChip(
-                    label: const Text('USB Direct'),
-                    selected: _connectionType == 'usb',
-                    selectedColor: const Color(0xFF2563EB),
-                    backgroundColor: const Color(0xFF0F172A),
-                    labelStyle: TextStyle(
-                      color: _connectionType == 'usb' ? Colors.white : const Color(0xFF94A3B8),
-                      fontSize: 12,
-                    ),
-                    avatar: const Icon(Icons.usb, size: 14, color: Colors.white),
-                    onSelected: (_) => setState(() => _connectionType = 'usb'),
-                  ),
-                  ChoiceChip(
                     label: const Text('Built-in (Sunmi/iMin)'),
                     selected: _connectionType == 'builtin',
                     selectedColor: const Color(0xFF2563EB),
@@ -174,6 +307,18 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                     ),
                     avatar: const Icon(Icons.phone_android, size: 14, color: Colors.white),
                     onSelected: (_) => setState(() => _connectionType = 'builtin'),
+                  ),
+                  ChoiceChip(
+                    label: const Text('USB Direct'),
+                    selected: _connectionType == 'usb',
+                    selectedColor: const Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF0F172A),
+                    labelStyle: TextStyle(
+                      color: _connectionType == 'usb' ? Colors.white : const Color(0xFF94A3B8),
+                      fontSize: 12,
+                    ),
+                    avatar: const Icon(Icons.usb, size: 14, color: Colors.white),
+                    onSelected: (_) => setState(() => _connectionType = 'usb'),
                   ),
                 ],
               ),
@@ -210,7 +355,7 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                                 fontSize: 13,
                               ),
                             ),
-                            const Text('32 Chars (Standard)', style: TextStyle(color: Color(0xFF64748B), fontSize: 10)),
+                            const Text('32 Chars (Standard Roll)', style: TextStyle(color: Color(0xFF64748B), fontSize: 10)),
                           ],
                         ),
                       ),
@@ -250,9 +395,10 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Connection Specific Fields
+              // Interface-specific Configuration Area
               if (_connectionType == 'wifi') ...[
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       flex: 3,
@@ -262,6 +408,9 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                         decoration: InputDecoration(
                           labelText: 'Printer IP Address',
                           labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                          hintText: '192.168.1.100',
+                          hintStyle: const TextStyle(color: Color(0xFF475569)),
+                          prefixIcon: const Icon(Icons.lan, color: Color(0xFF38BDF8), size: 18),
                           filled: true,
                           fillColor: const Color(0xFF0F172A),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -276,8 +425,10 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                         keyboardType: TextInputType.number,
                         style: const TextStyle(color: Colors.white, fontSize: 13),
                         decoration: InputDecoration(
-                          labelText: 'Port (9100)',
+                          labelText: 'Port',
                           labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                          hintText: '9100',
+                          hintStyle: const TextStyle(color: Color(0xFF475569)),
                           filled: true,
                           fillColor: const Color(0xFF0F172A),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -286,15 +437,175 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                // Ping WiFi Printer Button & Status
+                Row(
+                  children: [
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF38BDF8),
+                        side: const BorderSide(color: Color(0xFF38BDF8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: _isTestingConnection
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF38BDF8)),
+                            )
+                          : const Icon(Icons.network_check, size: 16),
+                      label: Text(
+                        _isTestingConnection ? 'Testing...' : 'Test WiFi Ping',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: _isTestingConnection ? null : _testWifiConnection,
+                    ),
+                  ],
+                ),
+                if (_connectionTestResult != null) ...[
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: (_connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFEF4444)).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _connectionTestSuccess == true ? Icons.check_circle : Icons.error_outline,
+                          size: 16,
+                          color: _connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _connectionTestResult!,
+                            style: TextStyle(
+                              color: _connectionTestSuccess == true ? const Color(0xFF10B981) : const Color(0xFFF87171),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 14),
-              ] else if (_connectionType == 'bluetooth') ...[
+              ] else ...[
+                // System / Bluetooth / USB / Built-in Device Picker
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      lang == AppLanguage.my ? 'တွေ့ရှိထားသော စက်ကိရိယာများ' : 'Detected Hardware Devices',
+                      style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF38BDF8),
+                        padding: EdgeInsets.zero,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      icon: _isScanning
+                          ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF38BDF8)))
+                          : const Icon(Icons.refresh, size: 14),
+                      label: Text(_isScanning ? 'Scanning...' : 'Rescan', style: const TextStyle(fontSize: 11)),
+                      onPressed: _isScanning ? null : _scanPrinters,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+
+                if (_availablePrinters.isNotEmpty) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFF334155)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        dropdownColor: const Color(0xFF0F172A),
+                        value: _availablePrinters.any((p) => p.name == _printerNameController.text)
+                            ? _printerNameController.text
+                            : _availablePrinters.first.name,
+                        icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8)),
+                        items: _availablePrinters.map((p) {
+                          return DropdownMenuItem<String>(
+                            value: p.name,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  p.isDefault ? Icons.star : Icons.print,
+                                  size: 16,
+                                  color: p.isDefault ? const Color(0xFFF59E0B) : const Color(0xFF38BDF8),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    '${p.name} ${p.isDefault ? "(Default)" : ""}',
+                                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            setState(() => _printerNameController.text = val);
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFF334155)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.info_outline, size: 16, color: Color(0xFF38BDF8)),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                _connectionType == 'builtin'
+                                    ? 'Sunmi & iMin built-in thermal printers will print directly via native spooler.'
+                                    : _connectionType == 'bluetooth'
+                                        ? 'Please pair your Bluetooth thermal printer in device Settings first.'
+                                        : 'Please connect your USB printer via USB cable or OTG adapter.',
+                                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 10),
                 TextField(
                   controller: _printerNameController,
                   style: const TextStyle(color: Colors.white, fontSize: 13),
                   decoration: InputDecoration(
-                    labelText: lang == AppLanguage.my ? 'Bluetooth ပရင်တာ အမည် / MAC' : 'Bluetooth Device Name / MAC',
+                    labelText: lang == AppLanguage.my ? 'ပရင်တာ အမည် / Device Name' : 'Target Printer Name (or leave blank for default)',
                     labelStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-                    prefixIcon: const Icon(Icons.bluetooth_searching, color: Color(0xFF38BDF8), size: 18),
+                    prefixIcon: const Icon(Icons.devices, color: Color(0xFF38BDF8), size: 18),
                     filled: true,
                     fillColor: const Color(0xFF0F172A),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -341,20 +652,45 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Test Print Button
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF38BDF8),
-                  side: const BorderSide(color: Color(0xFF38BDF8)),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: const Icon(Icons.print, size: 18),
-                label: Text(
-                  lang == AppLanguage.my ? 'စမ်းသပ်ပရင့် ထုတ်ကြည့်မည် (Test Print)' : 'Test Print Slip',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                ),
-                onPressed: _handleTestPrint,
+              // Test Print Actions Row
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF94A3B8),
+                        side: const BorderSide(color: Color(0xFF334155)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.preview, size: 16),
+                      label: const Text('Preview Slip', style: TextStyle(fontSize: 12)),
+                      onPressed: _handlePreviewTestSlip,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D9488),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: _isSendingTestPrint
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Icon(Icons.print, size: 16),
+                      label: Text(
+                        _isSendingTestPrint
+                            ? 'Printing...'
+                            : (lang == AppLanguage.my ? 'စမ်းသပ်ပရင့် ထုတ်မည်' : 'Send Test Print'),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                      onPressed: _isSendingTestPrint ? null : _handleDirectTestPrint,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
 
@@ -366,19 +702,7 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: const Color(0xFF10B981),
-                      content: Text(
-                        lang == AppLanguage.my
-                            ? 'ပရင်တာ ဆက်တင်များ မှတ်သားပြီးပါပြီ'
-                            : 'Printer settings saved successfully!',
-                      ),
-                    ),
-                  );
-                },
+                onPressed: _handleSave,
                 child: Text(
                   AppTranslations.tr('btn_save', lang),
                   style: const TextStyle(fontWeight: FontWeight.bold),
