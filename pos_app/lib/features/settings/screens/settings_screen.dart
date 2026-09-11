@@ -18,6 +18,7 @@ import '../widgets/printer_settings_dialog.dart';
 import '../widgets/scan_gun_settings_dialog.dart';
 import '../widgets/backup_restore_dialog.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/widgets/app_header_logo.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -38,14 +39,7 @@ class SettingsScreen extends ConsumerWidget {
         elevation: 0,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.settings, color: Color(0xFF60A5FA), size: 22),
-            ),
+            const AppHeaderLogo(size: 34, borderRadius: 10),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

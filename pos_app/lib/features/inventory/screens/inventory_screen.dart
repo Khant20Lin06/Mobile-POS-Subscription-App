@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/widgets/product_image_widget.dart';
+import '../../../core/widgets/app_header_logo.dart';
 import '../widgets/category_management_dialog.dart';
 import '../widgets/product_form_dialog.dart';
 import '../widgets/stock_adjustment_dialog.dart';
@@ -106,8 +107,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         elevation: 0,
         title: const Row(
           children: [
-            Icon(Icons.inventory_2, color: Color(0xFF38BDF8), size: 22),
-            SizedBox(width: 8),
+            AppHeaderLogo(size: 28, borderRadius: 8),
+            SizedBox(width: 10),
             Expanded(
               child: Text(
                 'Stock & Inventory',

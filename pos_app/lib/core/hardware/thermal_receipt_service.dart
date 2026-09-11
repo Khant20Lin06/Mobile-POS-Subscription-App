@@ -118,7 +118,6 @@ class ThermalReceiptFormatter {
 
     // Footer
     buffer.writeln(_center('Thank You! Come Again', width));
-    buffer.writeln(_center('ကျေးဇူးတင်ပါသည်', width));
     buffer.writeln('\n\n\n'); // Paper feed
 
     return buffer.toString();
@@ -177,7 +176,6 @@ class ThermalReceiptFormatter {
     }
 
     buffer.writeln(_center('Thank you for your payment!', lineWidth));
-    buffer.writeln(_center('(ကျေးဇူးတင်ပါသည်)', lineWidth));
     buffer.writeln('\n\n');
 
     return buffer.toString();

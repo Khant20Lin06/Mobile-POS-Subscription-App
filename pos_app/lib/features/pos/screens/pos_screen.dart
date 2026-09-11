@@ -15,6 +15,7 @@ import '../../shifts/widgets/shift_drawer_dialog.dart';
 import '../../shifts/widgets/close_shift_dialog.dart';
 import '../widgets/receipt_dialog.dart';
 import '../../../core/widgets/product_image_widget.dart';
+import '../../../core/widgets/app_header_logo.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../subscription/widgets/plan_showcase_dialog.dart';
 import '../../inventory/widgets/category_management_dialog.dart';
@@ -87,14 +88,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         elevation: 0,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF3B82F6).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.storefront, color: Color(0xFF60A5FA), size: 20),
-            ),
+            const AppHeaderLogo(size: 32, borderRadius: 8),
             const SizedBox(width: 10),
             Expanded(
               child: Column(

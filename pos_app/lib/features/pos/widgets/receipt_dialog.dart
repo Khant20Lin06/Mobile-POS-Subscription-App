@@ -121,7 +121,7 @@ class ReceiptDialog extends StatelessWidget {
                         ],
                       ),
                       child: SelectableText(
-                        formattedText.trim(),
+                        _sanitizeReceiptText(formattedText),
                         style: const TextStyle(
                           fontFamily: 'monospace',
                           fontFamilyFallback: ['Courier', 'Consolas', 'Courier New'],
@@ -202,5 +202,16 @@ class ReceiptDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _sanitizeReceiptText(String text) {
+    final lines = text.split('\n');
+    while (lines.isNotEmpty && lines.first.trim().isEmpty) {
+      lines.removeAt(0);
+    }
+    while (lines.isNotEmpty && lines.last.trim().isEmpty) {
+      lines.removeLast();
+    }
+    return lines.map((l) => l.trimRight()).join('\n');
   }
 }

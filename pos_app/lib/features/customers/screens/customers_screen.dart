@@ -7,6 +7,7 @@ import '../../../core/providers/database_provider.dart';
 import '../widgets/customer_form_dialog.dart';
 import '../widgets/customer_statement_dialog.dart';
 import '../widgets/debt_repayment_dialog.dart';
+import '../../../core/widgets/app_header_logo.dart';
 
 class CustomersScreen extends ConsumerStatefulWidget {
   const CustomersScreen({super.key});
@@ -97,8 +98,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         elevation: 0,
         title: const Row(
           children: [
-            Icon(Icons.people_alt, color: Color(0xFF38BDF8), size: 22),
-            SizedBox(width: 8),
+            AppHeaderLogo(size: 28, borderRadius: 8),
+            SizedBox(width: 10),
             Expanded(
               child: Text(
                 'Customers & Debt Ledger',

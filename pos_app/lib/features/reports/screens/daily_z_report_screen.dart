@@ -8,6 +8,7 @@ import '../../../core/hardware/thermal_receipt_service.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../pos/widgets/receipt_dialog.dart';
+import '../../../core/widgets/app_header_logo.dart';
 
 enum ReportPeriod {
   today,
@@ -95,14 +96,7 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
         elevation: 0,
         title: Row(
           children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.analytics_outlined, color: Color(0xFF10B981), size: 20),
-            ),
+            const AppHeaderLogo(size: 32, borderRadius: 8),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
