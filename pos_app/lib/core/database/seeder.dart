@@ -127,6 +127,7 @@ class DatabaseSeeder {
           'cost': 2000.0,
           'price': 3800.0,
           'stock': 50,
+          'imageUrl': 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=400&q=80',
         },
         {
           'name': 'Hot Cappuccino',
@@ -135,6 +136,7 @@ class DatabaseSeeder {
           'cost': 2200.0,
           'price': 4200.0,
           'stock': 40,
+          'imageUrl': 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&q=80',
         },
         {
           'name': 'Butter Croissant',
@@ -143,6 +145,7 @@ class DatabaseSeeder {
           'cost': 1500.0,
           'price': 3000.0,
           'stock': 25,
+          'imageUrl': 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80',
         },
         {
           'name': 'Chocolate Brownie',
@@ -151,6 +154,7 @@ class DatabaseSeeder {
           'cost': 1800.0,
           'price': 3500.0,
           'stock': 30,
+          'imageUrl': 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80',
         },
         {
           'name': 'Mineral Water 1L',
@@ -159,6 +163,7 @@ class DatabaseSeeder {
           'cost': 500.0,
           'price': 1000.0,
           'stock': 120,
+          'imageUrl': 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=400&q=80',
         },
         {
           'name': 'Coca Cola 330ml Can',
@@ -167,6 +172,7 @@ class DatabaseSeeder {
           'cost': 1100.0,
           'price': 1800.0,
           'stock': 75,
+          'imageUrl': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80',
         },
       ];
 
@@ -182,6 +188,7 @@ class DatabaseSeeder {
                 sellingPrice: p['price'] as double,
                 stockQuantity: Value(p['stock'] as int),
                 trackStock: const Value(true),
+                imageUrl: Value(p['imageUrl'] as String?),
                 createdAt: Value(now),
                 updatedAt: Value(now),
                 syncStatus: const Value('pending'),

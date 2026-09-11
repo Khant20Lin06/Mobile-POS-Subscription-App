@@ -98,23 +98,28 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         title: const Row(
           children: [
             Icon(Icons.people_alt, color: Color(0xFF38BDF8), size: 22),
-            SizedBox(width: 10),
-            Text(
-              'Customers & Debt Ledger',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Customers & Debt Ledger',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
           ],
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 14),
+            padding: const EdgeInsets.only(right: 12),
             child: ElevatedButton.icon(
               onPressed: () => CustomerFormDialog.show(context),
-              icon: const Icon(Icons.person_add_alt, size: 18),
-              label: const Text('+ Customer'),
+              icon: const Icon(Icons.person_add_alt, size: 16),
+              label: const Text('+ Customer', style: TextStyle(fontSize: 12)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
@@ -145,37 +150,38 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
 
           return Column(
             children: [
-              // Top KPI Summary Cards
+              // Top KPI Summary Cards (Horizontally Scrollable for Mobile)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                child: Row(
-                  children: [
-                    _buildKpiCard(
-                      title: 'Total Customers',
-                      value: '${allCustomers.length}',
-                      subtitle: 'Active profiles',
-                      icon: Icons.people_outline,
-                      color: const Color(0xFF3B82F6),
-                    ),
-                    const SizedBox(width: 10),
-                    _buildKpiCard(
-                      title: 'Active Debtors',
-                      value: '$customersWithDebtCount',
-                      subtitle: 'Have unpaid balance',
-                      icon: Icons.assignment_late_outlined,
-                      color: customersWithDebtCount > 0 ? const Color(0xFFEF4444) : const Color(0xFF10B981),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildKpiCard(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildKpiCard(
+                        title: 'Total Customers',
+                        value: '${allCustomers.length}',
+                        subtitle: 'Active profiles',
+                        icon: Icons.people_outline,
+                        color: const Color(0xFF3B82F6),
+                      ),
+                      const SizedBox(width: 10),
+                      _buildKpiCard(
+                        title: 'Active Debtors',
+                        value: '$customersWithDebtCount',
+                        subtitle: 'Have unpaid balance',
+                        icon: Icons.assignment_late_outlined,
+                        color: customersWithDebtCount > 0 ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                      ),
+                      const SizedBox(width: 10),
+                      _buildKpiCard(
                         title: 'Total Market Debt',
                         value: '${_currencyFormat.format(totalMarketDebt)} MMK',
                         subtitle: 'Outstanding to collect',
                         icon: Icons.account_balance_wallet_outlined,
                         color: totalMarketDebt > 0 ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -305,128 +311,256 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     final hasDebt = customer.totalDebt > 0;
     final avatarColor = _generateAvatarColor(customer.name);
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF334155),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Initials Avatar
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: avatarColor.withValues(alpha: 0.2),
-            child: Text(
-              _getInitials(customer.name),
-              style: TextStyle(color: avatarColor, fontWeight: FontWeight.bold, fontSize: 13),
-            ),
-          ),
-          const SizedBox(width: 12),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 500;
 
-          // Name and Phone
-          Expanded(
-            flex: 4,
+        if (isNarrow) {
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF334155),
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  customer.name,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
+                // Top Row: Avatar + Name/Phone + Debt Badge
                 Row(
                   children: [
-                    Icon(Icons.phone, size: 12, color: customer.phone != null ? const Color(0xFF64748B) : Colors.transparent),
-                    const SizedBox(width: 4),
-                    Text(
-                      customer.phone ?? 'No phone',
-                      style: TextStyle(
-                        color: customer.phone != null ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                        fontSize: 11,
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: avatarColor.withValues(alpha: 0.2),
+                      child: Text(
+                        _getInitials(customer.name),
+                        style: TextStyle(color: avatarColor, fontWeight: FontWeight.bold, fontSize: 12),
                       ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            customer.name,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(Icons.phone, size: 11, color: customer.phone != null ? const Color(0xFF64748B) : Colors.transparent),
+                              const SizedBox(width: 4),
+                              Text(
+                                customer.phone ?? 'No phone',
+                                style: TextStyle(
+                                  color: customer.phone != null ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.15) : const Color(0xFF10B981).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF10B981).withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${_currencyFormat.format(customer.totalDebt)} MMK',
+                            style: TextStyle(
+                              color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            hasDebt ? 'Debt Due' : 'No Debt',
+                            style: TextStyle(
+                              color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Divider(color: Color(0xFF334155), height: 1),
+                const SizedBox(height: 4),
+
+                // Bottom Row: Action buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (hasDebt)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            backgroundColor: const Color(0xFF10B981).withValues(alpha: 0.15),
+                            foregroundColor: const Color(0xFF10B981),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          icon: const Icon(Icons.payments_outlined, size: 15),
+                          label: const Text('Repay', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          onPressed: () => DebtRepaymentDialog.show(context, customer),
+                        ),
+                      ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Statement',
+                      icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF38BDF8), size: 18),
+                      onPressed: () => CustomerStatementDialog.show(context, customer),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Edit',
+                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 18),
+                      onPressed: () => CustomerFormDialog.show(context, customerToEdit: customer),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Delete',
+                      icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                      onPressed: () => _confirmDeleteCustomer(customer),
                     ),
                   ],
                 ),
               ],
             ),
-          ),
+          );
+        }
 
-          // Outstanding Debt Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.15) : const Color(0xFF10B981).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF10B981).withValues(alpha: 0.4),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${_currencyFormat.format(customer.totalDebt)} MMK',
-                  style: TextStyle(
-                    color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-                Text(
-                  hasDebt ? 'Debt Outstanding' : 'No Debt',
-                  style: TextStyle(
-                    color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+        // Wide layout
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF334155),
             ),
           ),
-          const SizedBox(width: 12),
-
-          // Actions
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
-              // Repay Debt Button
-              if (hasDebt)
-                IconButton(
-                  tooltip: 'Repay Debt (အကြွေးဆပ်ရန်)',
-                  icon: const Icon(Icons.payments_outlined, color: Color(0xFF10B981), size: 22),
-                  onPressed: () => DebtRepaymentDialog.show(context, customer),
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: avatarColor.withValues(alpha: 0.2),
+                child: Text(
+                  _getInitials(customer.name),
+                  style: TextStyle(color: avatarColor, fontWeight: FontWeight.bold, fontSize: 13),
                 ),
-
-              // Ledger Statement Button
-              IconButton(
-                tooltip: 'Account Statement (စာရင်းမှတ်တမ်း)',
-                icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF38BDF8), size: 20),
-                onPressed: () => CustomerStatementDialog.show(context, customer),
               ),
-
-              // Edit Button
-              IconButton(
-                tooltip: 'Edit Profile',
-                icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 18),
-                onPressed: () => CustomerFormDialog.show(context, customerToEdit: customer),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customer.name,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.phone, size: 12, color: customer.phone != null ? const Color(0xFF64748B) : Colors.transparent),
+                        const SizedBox(width: 4),
+                        Text(
+                          customer.phone ?? 'No phone',
+                          style: TextStyle(
+                            color: customer.phone != null ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-
-              // Delete Button
-              IconButton(
-                tooltip: 'Delete',
-                icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
-                onPressed: () => _confirmDeleteCustomer(customer),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.15) : const Color(0xFF10B981).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF10B981).withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${_currencyFormat.format(customer.totalDebt)} MMK',
+                      style: TextStyle(
+                        color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      hasDebt ? 'Debt Outstanding' : 'No Debt',
+                      style: TextStyle(
+                        color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (hasDebt)
+                    IconButton(
+                      tooltip: 'Repay Debt (အကြွေးဆပ်ရန်)',
+                      icon: const Icon(Icons.payments_outlined, color: Color(0xFF10B981), size: 22),
+                      onPressed: () => DebtRepaymentDialog.show(context, customer),
+                    ),
+                  IconButton(
+                    tooltip: 'Account Statement (စာရင်းမှတ်တမ်း)',
+                    icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF38BDF8), size: 20),
+                    onPressed: () => CustomerStatementDialog.show(context, customer),
+                  ),
+                  IconButton(
+                    tooltip: 'Edit Profile',
+                    icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 18),
+                    onPressed: () => CustomerFormDialog.show(context, customerToEdit: customer),
+                  ),
+                  IconButton(
+                    tooltip: 'Delete',
+                    icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                    onPressed: () => _confirmDeleteCustomer(customer),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

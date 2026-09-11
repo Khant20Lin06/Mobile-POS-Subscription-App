@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
+import '../../../core/widgets/product_image_widget.dart';
 import 'category_form_dialog.dart';
 
 class ProductFormDialog extends ConsumerStatefulWidget {
@@ -33,6 +38,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
   late TextEditingController _costPriceController;
   late TextEditingController _sellingPriceController;
   late TextEditingController _stockController;
+  late TextEditingController _imageUrlController;
 
   String? _selectedCategoryId;
   bool _trackStock = true;
@@ -50,6 +56,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
     _costPriceController = TextEditingController(text: p != null ? p.costPrice.toStringAsFixed(0) : '0');
     _sellingPriceController = TextEditingController(text: p != null ? p.sellingPrice.toStringAsFixed(0) : '0');
     _stockController = TextEditingController(text: p != null ? p.stockQuantity.toString() : '0');
+    _imageUrlController = TextEditingController(text: p?.imageUrl ?? '');
     _selectedCategoryId = p?.categoryId;
     _trackStock = p?.trackStock ?? true;
     _isActive = p?.isActive ?? true;
@@ -62,6 +69,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
     _costPriceController.dispose();
     _sellingPriceController.dispose();
     _stockController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -91,6 +99,53 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: source, maxWidth: 800, maxHeight: 800, imageQuality: 85);
+      if (picked == null) return;
+
+      final appDir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory('${appDir.path}/product_images');
+      if (!await imagesDir.exists()) {
+        await imagesDir.create(recursive: true);
+      }
+
+      final ext = path.extension(picked.path);
+      final filename = '${const Uuid().v4()}$ext';
+      final localFile = await File(picked.path).copy('${imagesDir.path}/$filename');
+
+      if (mounted) {
+        setState(() {
+          _imageUrlController.text = localFile.path;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: Colors.redAccent, content: Text('Error picking image: $e')),
+        );
+      }
+    }
+  }
+
+  Widget _buildPresetChip(String label, String url) {
+    return InkWell(
+      onTap: () => setState(() => _imageUrlController.text = url),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF334155)),
+        ),
+        child: Text(label, style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 10, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
+
   Future<void> _saveProduct() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -106,6 +161,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
       final cost = _costPrice;
       final selling = _sellingPrice;
       final stock = int.tryParse(_stockController.text.trim()) ?? 0;
+      final imageUrl = _imageUrlController.text.trim().isEmpty ? null : _imageUrlController.text.trim();
       final now = DateTime.now().toUtc();
 
       if (_isEditing) {
@@ -119,6 +175,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
             sellingPrice: drift.Value(selling),
             stockQuantity: drift.Value(stock),
             trackStock: drift.Value(_trackStock),
+            imageUrl: drift.Value(imageUrl),
             isActive: drift.Value(_isActive),
             updatedAt: drift.Value(now),
             syncStatus: const drift.Value('pending'),
@@ -135,6 +192,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
           sellingPrice: selling,
           stockQuantity: drift.Value(stock),
           trackStock: drift.Value(_trackStock),
+          imageUrl: drift.Value(imageUrl),
           isActive: drift.Value(_isActive),
           createdAt: drift.Value(now),
           updatedAt: drift.Value(now),
@@ -196,6 +254,138 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Product Image Selector Card
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF334155)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.image_outlined, size: 16, color: Color(0xFF38BDF8)),
+                          SizedBox(width: 6),
+                          Text('Product Image (ဓာတ်ပုံ)', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Preview Box
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              ProductImageWidget(
+                                imageUrl: _imageUrlController.text,
+                                width: 70,
+                                height: 70,
+                                borderRadius: BorderRadius.circular(10),
+                                fallbackIcon: Icons.add_photo_alternate_outlined,
+                              ),
+                              if (_imageUrlController.text.isNotEmpty)
+                                Positioned(
+                                  top: -6,
+                                  right: -6,
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _imageUrlController.clear()),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.redAccent,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.close, size: 12, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(width: 12),
+
+                          // Image Action Buttons & URL input
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: const Color(0xFF38BDF8),
+                                          side: const BorderSide(color: Color(0xFF334155)),
+                                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                                        ),
+                                        icon: const Icon(Icons.photo_library, size: 14),
+                                        label: const Text('Gallery', style: TextStyle(fontSize: 11)),
+                                        onPressed: () => _pickImage(ImageSource.gallery),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: const Color(0xFF10B981),
+                                          side: const BorderSide(color: Color(0xFF334155)),
+                                          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+                                        ),
+                                        icon: const Icon(Icons.camera_alt, size: 14),
+                                        label: const Text('Camera', style: TextStyle(fontSize: 11)),
+                                        onPressed: () => _pickImage(ImageSource.camera),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _imageUrlController,
+                                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                                  decoration: InputDecoration(
+                                    hintText: 'Or paste image URL (https://...)',
+                                    hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                    filled: true,
+                                    fillColor: const Color(0xFF1E293B),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF334155))),
+                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF334155))),
+                                  ),
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Preset Samples
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            const Text('Presets: ', style: TextStyle(color: Color(0xFF64748B), fontSize: 10)),
+                            _buildPresetChip('Coffee', 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=400&q=80'),
+                            const SizedBox(width: 4),
+                            _buildPresetChip('Bakery', 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80'),
+                            const SizedBox(width: 4),
+                            _buildPresetChip('Beverage', 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=400&q=80'),
+                            const SizedBox(width: 4),
+                            _buildPresetChip('Snack', 'https://images.unsplash.com/photo-1621996346565-e3d5d6281290?w=400&q=80'),
+                            const SizedBox(width: 4),
+                            _buildPresetChip('Food', 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
                 // Product Name
                 const Text('Product Name *', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 6),

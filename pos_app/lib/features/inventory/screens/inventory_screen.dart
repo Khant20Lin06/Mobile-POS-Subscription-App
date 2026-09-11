@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
+import '../../../core/widgets/product_image_widget.dart';
 import '../widgets/category_form_dialog.dart';
 import '../widgets/product_form_dialog.dart';
 import '../widgets/stock_adjustment_dialog.dart';
@@ -106,10 +107,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         title: const Row(
           children: [
             Icon(Icons.inventory_2, color: Color(0xFF38BDF8), size: 22),
-            SizedBox(width: 10),
-            Text(
-              'Stock & Inventory',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Stock & Inventory',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
           ],
         ),
@@ -121,18 +126,19 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             icon: const Icon(Icons.create_new_folder_outlined, size: 18, color: Color(0xFF38BDF8)),
             style: IconButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
 
           // Add Product Button
           Padding(
-            padding: const EdgeInsets.only(right: 14),
+            padding: const EdgeInsets.only(right: 12),
             child: ElevatedButton.icon(
               onPressed: () => _openProductForm(),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('+ Product'),
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('+ Product', style: TextStyle(fontSize: 12)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
@@ -174,45 +180,46 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
           return Column(
             children: [
-              // Top KPI Summary Cards
+              // Top KPI Summary Cards (Horizontally Scrollable for Mobile)
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                child: Row(
-                  children: [
-                    _buildKpiCard(
-                      title: 'Total Items',
-                      value: '${allProducts.length}',
-                      subtitle: 'Active products',
-                      icon: Icons.grid_view_rounded,
-                      color: const Color(0xFF3B82F6),
-                    ),
-                    const SizedBox(width: 10),
-                    _buildKpiCard(
-                      title: 'Total Units',
-                      value: _currencyFormat.format(totalUnits),
-                      subtitle: 'In stock',
-                      icon: Icons.all_inbox_rounded,
-                      color: const Color(0xFF10B981),
-                    ),
-                    const SizedBox(width: 10),
-                    _buildKpiCard(
-                      title: 'Low Stock',
-                      value: '$lowStockAlerts',
-                      subtitle: '<= $_lowStockThreshold units',
-                      icon: Icons.warning_amber_rounded,
-                      color: lowStockAlerts > 0 ? const Color(0xFFEF4444) : const Color(0xFF94A3B8),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildKpiCard(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildKpiCard(
+                        title: 'Total Items',
+                        value: '${allProducts.length}',
+                        subtitle: 'Active products',
+                        icon: Icons.grid_view_rounded,
+                        color: const Color(0xFF3B82F6),
+                      ),
+                      const SizedBox(width: 10),
+                      _buildKpiCard(
+                        title: 'Total Units',
+                        value: _currencyFormat.format(totalUnits),
+                        subtitle: 'In stock',
+                        icon: Icons.all_inbox_rounded,
+                        color: const Color(0xFF10B981),
+                      ),
+                      const SizedBox(width: 10),
+                      _buildKpiCard(
+                        title: 'Low Stock',
+                        value: '$lowStockAlerts',
+                        subtitle: '<= $_lowStockThreshold units',
+                        icon: Icons.warning_amber_rounded,
+                        color: lowStockAlerts > 0 ? const Color(0xFFEF4444) : const Color(0xFF94A3B8),
+                      ),
+                      const SizedBox(width: 10),
+                      _buildKpiCard(
                         title: 'Inventory Value',
                         value: '${_currencyFormat.format(totalRetailValuation)} MMK',
                         subtitle: 'Cost: ${_currencyFormat.format(totalCostValuation)} MMK',
                         icon: Icons.account_balance_wallet_outlined,
                         color: const Color(0xFFF59E0B),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
@@ -396,91 +403,111 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ? const Color(0xFFF59E0B)
             : const Color(0xFF10B981);
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isOutOfStock
-              ? const Color(0xFFEF4444).withValues(alpha: 0.5)
-              : isLowStock
-                  ? const Color(0xFFF59E0B).withValues(alpha: 0.5)
-                  : const Color(0xFF334155),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Leading Thumbnail / Category Dot
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF0F172A),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF334155)),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.inventory_2_outlined,
-              color: category?.colorCode != null
-                  ? Color(int.parse('FF${category!.colorCode!.replaceAll('#', '')}', radix: 16))
-                  : const Color(0xFF60A5FA),
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 550;
 
-          // Name, Category, Barcode
-          Expanded(
-            flex: 4,
+        if (isMobile) {
+          return Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E293B),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isOutOfStock
+                    ? const Color(0xFFEF4444).withValues(alpha: 0.5)
+                    : isLowStock
+                        ? const Color(0xFFF59E0B).withValues(alpha: 0.5)
+                        : const Color(0xFF334155),
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top Row: Product Image + Name/Category + Retail Price & Stock Badge
                 Row(
                   children: [
-                    Flexible(
-                      child: Text(
-                        product.name,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ProductImageWidget(
+                      imageUrl: product.imageUrl,
+                      width: 44,
+                      height: 44,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.name,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (category != null) ...[
+                            const SizedBox(height: 2),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: const Color(0xFF334155)),
+                              ),
+                              child: Text(
+                                category.name,
+                                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 9),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    if (category != null) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0F172A),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFF334155)),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${_currencyFormat.format(product.sellingPrice)} MMK',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                         ),
-                        child: Text(
-                          category.name,
-                          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                        const SizedBox(height: 2),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: stockBadgeColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: stockBadgeColor.withValues(alpha: 0.4)),
+                          ),
+                          child: Text(
+                            product.trackStock
+                                ? (isOutOfStock ? 'Out' : '${product.stockQuantity} left')
+                                : '∞ Stock',
+                            style: TextStyle(color: stockBadgeColor, fontSize: 9, fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
+
+                // Middle Row: Barcode + Cost + Margin
                 Row(
                   children: [
                     if (product.barcode != null && product.barcode!.isNotEmpty) ...[
-                      const Icon(Icons.qr_code, size: 12, color: Color(0xFF64748B)),
-                      const SizedBox(width: 4),
+                      const Icon(Icons.qr_code, size: 11, color: Color(0xFF64748B)),
+                      const SizedBox(width: 3),
                       Text(
                         product.barcode!,
-                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 11, fontFamily: 'monospace'),
+                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 10, fontFamily: 'monospace'),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                     ],
                     Text(
                       'Cost: ${_currencyFormat.format(product.costPrice)} MMK',
-                      style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                      style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Text(
                       '(${marginPct.toStringAsFixed(0)}% Margin)',
                       style: TextStyle(
@@ -491,84 +518,210 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+                const SizedBox(height: 8),
+                const Divider(color: Color(0xFF334155), height: 1),
+                const SizedBox(height: 4),
 
-          // Retail Price
-          Expanded(
-            flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${_currencyFormat.format(product.sellingPrice)} MMK',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                const Text(
-                  'Retail Price',
-                  style: TextStyle(color: Color(0xFF64748B), fontSize: 10),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-
-          // Stock Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: stockBadgeColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: stockBadgeColor.withValues(alpha: 0.4)),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  product.trackStock ? '${product.stockQuantity}' : '∞',
-                  style: TextStyle(color: stockBadgeColor, fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                Text(
-                  isOutOfStock
-                      ? 'Out of Stock'
-                      : isLowStock
-                          ? 'Low Stock'
-                          : 'In Stock',
-                  style: TextStyle(color: stockBadgeColor, fontSize: 9, fontWeight: FontWeight.w600),
+                // Bottom Row: Action buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFF38BDF8).withValues(alpha: 0.15),
+                        foregroundColor: const Color(0xFF38BDF8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: const Icon(Icons.swap_vert_circle_outlined, size: 15),
+                      label: const Text('Stock (+/-)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      onPressed: () => StockAdjustmentDialog.show(context, product),
+                    ),
+                    const SizedBox(width: 4),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Edit Product',
+                      icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 18),
+                      onPressed: () => _openProductForm(productToEdit: product),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Delete',
+                      icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                      onPressed: () => _confirmDeleteProduct(product),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
+          );
+        }
 
-          // Actions
-          Row(
-            mainAxisSize: MainAxisSize.min,
+        // Wide desktop layout
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isOutOfStock
+                  ? const Color(0xFFEF4444).withValues(alpha: 0.5)
+                  : isLowStock
+                      ? const Color(0xFFF59E0B).withValues(alpha: 0.5)
+                      : const Color(0xFF334155),
+            ),
+          ),
+          child: Row(
             children: [
-              // Adjust Stock Button
-              IconButton(
-                tooltip: 'Stock Movement (+/-)',
-                icon: const Icon(Icons.swap_vert_circle_outlined, color: Color(0xFF38BDF8), size: 22),
-                onPressed: () => StockAdjustmentDialog.show(context, product),
+              ProductImageWidget(
+                imageUrl: product.imageUrl,
+                width: 44,
+                height: 44,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              const SizedBox(width: 12),
+
+              // Name, Category, Barcode
+              Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            product.name,
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (category != null) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF334155)),
+                            ),
+                            child: Text(
+                              category.name,
+                              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (product.barcode != null && product.barcode!.isNotEmpty) ...[
+                          const Icon(Icons.qr_code, size: 12, color: Color(0xFF64748B)),
+                          const SizedBox(width: 4),
+                          Text(
+                            product.barcode!,
+                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 11, fontFamily: 'monospace'),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        Text(
+                          'Cost: ${_currencyFormat.format(product.costPrice)} MMK',
+                          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '(${marginPct.toStringAsFixed(0)}% Margin)',
+                          style: TextStyle(
+                            color: marginPct >= 20 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
 
-              // Edit Product Button
-              IconButton(
-                tooltip: 'Edit Product',
-                icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 20),
-                onPressed: () => _openProductForm(productToEdit: product),
+              // Retail Price
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${_currencyFormat.format(product.sellingPrice)} MMK',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    const Text(
+                      'Retail Price',
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 10),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 16),
 
-              // Delete Product Button
-              IconButton(
-                tooltip: 'Delete',
-                icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
-                onPressed: () => _confirmDeleteProduct(product),
+              // Stock Badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: stockBadgeColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: stockBadgeColor.withValues(alpha: 0.4)),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      product.trackStock ? '${product.stockQuantity}' : '∞',
+                      style: TextStyle(color: stockBadgeColor, fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    Text(
+                      isOutOfStock
+                          ? 'Out of Stock'
+                          : isLowStock
+                              ? 'Low Stock'
+                              : 'In Stock',
+                      style: TextStyle(color: stockBadgeColor, fontSize: 9, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Actions
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Adjust Stock Button
+                  IconButton(
+                    tooltip: 'Stock Movement (+/-)',
+                    icon: const Icon(Icons.swap_vert_circle_outlined, color: Color(0xFF38BDF8), size: 22),
+                    onPressed: () => StockAdjustmentDialog.show(context, product),
+                  ),
+
+                  // Edit Product Button
+                  IconButton(
+                    tooltip: 'Edit Product',
+                    icon: const Icon(Icons.edit_outlined, color: Color(0xFF94A3B8), size: 20),
+                    onPressed: () => _openProductForm(productToEdit: product),
+                  ),
+
+                  // Delete Product Button
+                  IconButton(
+                    tooltip: 'Delete',
+                    icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 20),
+                    onPressed: () => _confirmDeleteProduct(product),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

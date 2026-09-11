@@ -14,6 +14,7 @@ import '../../shifts/widgets/open_shift_dialog.dart';
 import '../../shifts/widgets/shift_drawer_dialog.dart';
 import '../../shifts/widgets/close_shift_dialog.dart';
 import '../widgets/receipt_dialog.dart';
+import '../../../core/widgets/product_image_widget.dart';
 
 class PosScreen extends ConsumerStatefulWidget {
   const PosScreen({super.key});
@@ -117,50 +118,23 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ],
         ),
         actions: [
-          // Barcode & Fast Search Field
-          Container(
-            width: 200,
-            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-            child: TextField(
-              controller: _searchController,
-              focusNode: _barcodeFocusNode,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-              decoration: InputDecoration(
-                hintText: 'Search or Scan Barcode...',
-                hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                prefixIcon: const Icon(Icons.qr_code_scanner, color: Color(0xFF38BDF8), size: 18),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, size: 16, color: Color(0xFF94A3B8)),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchQuery = '');
-                        },
-                      )
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                filled: true,
-                fillColor: const Color(0xFF0F172A),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFF3B82F6)),
-                ),
-              ),
-              onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
-              onSubmitted: _onBarcodeSubmitted,
-            ),
+          // On Desktop/Tablet (>=750px), show search field in AppBar
+          Builder(
+            builder: (context) {
+              final isWide = MediaQuery.of(context).size.width >= 750;
+              if (!isWide) return const SizedBox.shrink();
+              return Container(
+                width: 220,
+                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                child: _buildSearchBar(),
+              );
+            },
           ),
           IconButton(
             tooltip: 'Sync to Cloud',
-            icon: const Icon(Icons.cloud_sync, color: Color(0xFF38BDF8), size: 22),
+            icon: const Icon(Icons.cloud_sync, color: Color(0xFF38BDF8), size: 20),
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
             onPressed: () async {
               final syncService = ref.read(syncServiceProvider);
               final messenger = ScaffoldMessenger.of(context);
@@ -180,8 +154,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               final isPro = shop?.planTier == 'pro' || shop?.planTier == 'custom';
 
               return Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                 decoration: BoxDecoration(
                   color: isPro
                       ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
@@ -189,7 +163,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   border: Border.all(
                     color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
                   ),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -197,15 +171,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     Icon(
                       isPro ? Icons.stars : Icons.wifi_off,
                       color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                      size: 13,
+                      size: 11,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 3),
                     Text(
                       isPro ? 'PRO' : 'FREE',
                       style: TextStyle(
                         color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
                         fontWeight: FontWeight.bold,
-                        fontSize: 11,
+                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -219,6 +193,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               final shiftAsync = ref.watch(activeShiftStreamProvider);
               final shift = shiftAsync.value;
               final isOpen = shift != null;
+              final screenWidth = MediaQuery.of(context).size.width;
+              final isCompact = screenWidth < 500;
 
               return InkWell(
                 onTap: () async {
@@ -241,8 +217,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: isOpen
                         ? const Color(0xFF10B981).withValues(alpha: 0.15)
@@ -250,7 +226,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     border: Border.all(
                       color: isOpen ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -258,15 +234,17 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       Icon(
                         isOpen ? Icons.point_of_sale : Icons.lock_clock,
                         color: isOpen ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
-                        size: 13,
+                        size: 12,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        isOpen ? 'Drawer: ${_currencyFormat.format(shift.expectedCash)}' : 'Open Shift',
+                        isCompact
+                            ? (isOpen ? 'Shift' : 'Open')
+                            : (isOpen ? 'Drawer: ${_currencyFormat.format(shift.expectedCash)}' : 'Open Shift'),
                         style: TextStyle(
                           color: isOpen ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
                           fontWeight: FontWeight.bold,
-                          fontSize: 11,
+                          fontSize: 10,
                         ),
                       ),
                     ],
@@ -280,6 +258,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             builder: (context, ref, _) {
               final activeUser = ref.watch(currentUserProvider);
               final isOwner = activeUser?.role == 'owner';
+              final screenWidth = MediaQuery.of(context).size.width;
+              final isCompact = screenWidth < 500;
 
               return PopupMenuButton<String>(
                 tooltip: 'Cashier Profile & Security',
@@ -360,8 +340,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   ),
                 ],
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+                  padding: EdgeInsets.symmetric(horizontal: isCompact ? 6 : 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(20),
@@ -371,7 +351,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       CircleAvatar(
-                        radius: 12,
+                        radius: 11,
                         backgroundColor: isOwner ? const Color(0xFFF59E0B) : const Color(0xFF2563EB),
                         child: Text(
                           activeUser != null && activeUser.name.isNotEmpty
@@ -380,24 +360,27 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        activeUser?.name ?? 'Cashier',
-                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                      ),
-                      const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8), size: 18),
+                      if (!isCompact) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          activeUser?.name ?? 'Cashier',
+                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                        const Icon(Icons.arrow_drop_down, color: Color(0xFF94A3B8), size: 16),
+                      ],
                     ],
                   ),
                 ),
               );
             },
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
         ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isLargeScreen = constraints.maxWidth >= 850;
+          final isWide = constraints.maxWidth >= 750;
 
           if (isLargeScreen) {
             // Split-View Landscape (Tablet / POS Terminal / Desktop)
@@ -407,7 +390,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 // Catalog Section (60% width)
                 Expanded(
                   flex: 6,
-                  child: _buildCatalogSection(productsAsync),
+                  child: _buildCatalogSection(productsAsync, showSearchBar: !isWide),
                 ),
                 // Live Cart Section (40% width)
                 const SizedBox(
@@ -426,7 +409,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 Positioned.fill(
                   child: Padding(
                     padding: EdgeInsets.only(bottom: cart.isEmpty ? 0 : 70),
-                    child: _buildCatalogSection(productsAsync),
+                    child: _buildCatalogSection(productsAsync, showSearchBar: true),
                   ),
                 ),
 
@@ -446,9 +429,55 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     );
   }
 
-  Widget _buildCatalogSection(AsyncValue<List<Product>> productsAsync) {
+  Widget _buildSearchBar() {
+    return TextField(
+      controller: _searchController,
+      focusNode: _barcodeFocusNode,
+      style: const TextStyle(color: Colors.white, fontSize: 13),
+      decoration: InputDecoration(
+        hintText: 'Search or Scan Barcode...',
+        hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+        prefixIcon: const Icon(Icons.qr_code_scanner, color: Color(0xFF38BDF8), size: 18),
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, size: 16, color: Color(0xFF94A3B8)),
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() => _searchQuery = '');
+                },
+              )
+            : null,
+        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+        filled: true,
+        fillColor: const Color(0xFF0F172A),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF334155)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF334155)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF3B82F6)),
+        ),
+      ),
+      onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
+      onSubmitted: _onBarcodeSubmitted,
+    );
+  }
+
+  Widget _buildCatalogSection(AsyncValue<List<Product>> productsAsync, {bool showSearchBar = false}) {
     return Column(
       children: [
+        if (showSearchBar)
+          Container(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+            color: const Color(0xFF1E293B),
+            child: _buildSearchBar(),
+          ),
+
         // Category Pills
         _buildCategoryPills(),
 
@@ -487,17 +516,20 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 builder: (context, gridConstraints) {
                   // Dynamic column count based on available catalog width
                   int crossAxisCount = 2;
+                  double childAspectRatio = 0.76;
                   if (gridConstraints.maxWidth > 700) {
                     crossAxisCount = 4;
+                    childAspectRatio = 0.85;
                   } else if (gridConstraints.maxWidth > 480) {
                     crossAxisCount = 3;
+                    childAspectRatio = 0.82;
                   }
 
                   return GridView.builder(
                     padding: const EdgeInsets.all(12),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
-                      childAspectRatio: 0.85,
+                      childAspectRatio: childAspectRatio,
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                     ),
@@ -585,75 +617,95 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 ref.read(cartProvider.notifier).addToCart(product);
               },
         child: Container(
-          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isOutOfStock ? Colors.red.withValues(alpha: 0.3) : const Color(0xFF334155),
             ),
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Icon & Stock Badge
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Top Product Image with Stock Badge overlay
+              Stack(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(Icons.fastfood, color: Color(0xFF60A5FA), size: 20),
+                  ProductImageWidget(
+                    imageUrl: product.imageUrl,
+                    width: double.infinity,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: isOutOfStock
-                          ? Colors.red.withValues(alpha: 0.2)
-                          : product.stockQuantity <= 10
-                              ? Colors.amber.withValues(alpha: 0.2)
-                              : Colors.green.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      isOutOfStock ? 'Out' : '${product.stockQuantity}',
-                      style: TextStyle(
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
                         color: isOutOfStock
-                            ? Colors.redAccent
+                            ? const Color(0xFFEF4444).withValues(alpha: 0.9)
                             : product.stockQuantity <= 10
-                                ? Colors.amberAccent
-                                : Colors.greenAccent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+                                ? const Color(0xFFF59E0B).withValues(alpha: 0.9)
+                                : const Color(0xFF0F172A).withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: isOutOfStock
+                              ? Colors.redAccent
+                              : product.stockQuantity <= 10
+                                  ? Colors.amberAccent
+                                  : const Color(0xFF10B981),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        isOutOfStock ? 'Out' : '${product.stockQuantity}',
+                        style: TextStyle(
+                          color: isOutOfStock
+                              ? Colors.white
+                              : product.stockQuantity <= 10
+                                  ? Colors.white
+                                  : const Color(0xFF34D399),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const Spacer(),
 
-              // Name
-              Text(
-                product.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-
-              // Price
-              Text(
-                '${_currencyFormat.format(product.sellingPrice)} MMK',
-                style: const TextStyle(
-                  color: Color(0xFF10B981),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+              // Product Details
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        product.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        '${_currencyFormat.format(product.sellingPrice)} MMK',
+                        style: const TextStyle(
+                          color: Color(0xFF10B981),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

@@ -55,25 +55,32 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen>
                 color: const Color(0xFF3B82F6).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.point_of_sale, color: Color(0xFF60A5FA), size: 24),
+              child: const Icon(Icons.point_of_sale, color: Color(0xFF60A5FA), size: 22),
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Mobile POS Engine',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
-                ),
-                shopAsync.when(
-                  data: (shop) => Text(
-                    shop != null ? '${shop.name} (${shop.currency})' : 'Loading shop...',
-                    style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Mobile POS Engine',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  loading: () => const Text('Loading...', style: TextStyle(fontSize: 12)),
-                  error: (e, stack) => const Text('Error', style: TextStyle(fontSize: 12)),
-                ),
-              ],
+                  shopAsync.when(
+                    data: (shop) => Text(
+                      shop != null ? '${shop.name} (${shop.currency})' : 'Loading shop...',
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    loading: () => const Text('Loading...', style: TextStyle(fontSize: 11)),
+                    error: (e, stack) => const Text('Error', style: TextStyle(fontSize: 11)),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -83,10 +90,12 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen>
             builder: (context) {
               final shop = shopAsync.value;
               final isPro = shop?.planTier == 'pro' || shop?.planTier == 'custom';
+              final screenWidth = MediaQuery.of(context).size.width;
+              final isSmall = screenWidth < 500;
 
               return Container(
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isPro
                       ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
@@ -104,9 +113,11 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen>
                       color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
                       size: 14,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 4),
                     Text(
-                      isPro ? '${shop?.planTier.toUpperCase()} (Cloud Active)' : 'FREE (Offline Mode)',
+                      isSmall
+                          ? (isPro ? 'PRO' : 'FREE')
+                          : (isPro ? '${shop?.planTier.toUpperCase()} (Cloud Active)' : 'FREE (Offline Mode)'),
                       style: TextStyle(
                         color: isPro ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
                         fontWeight: FontWeight.bold,
@@ -121,10 +132,10 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen>
           // Upgrade Button (Telegram Link simulation)
           IconButton(
             tooltip: 'Upgrade / Manage License',
-            icon: const Icon(Icons.workspace_premium, color: Color(0xFFF59E0B), size: 24),
+            icon: const Icon(Icons.workspace_premium, color: Color(0xFFF59E0B), size: 22),
             onPressed: () => _showUpgradeDialog(context),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 4),
         ],
       ),
       body: Column(
