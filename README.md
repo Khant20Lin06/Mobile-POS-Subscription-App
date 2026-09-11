@@ -21,7 +21,7 @@ A modern, offline-first Mobile Point-of-Sale (POS) and Subscription application 
 ### 2. Pro & Custom Plan (Telegram Subscription Flow)
 - **Telegram Licensing**:
   - In-app Shop ID 1-tap copy.
-  - Direct connection to Telegram Admin (`@YourPOS_Admin`) for license purchase.
+  - Direct connection to Telegram Admin (`@khantlin0000`) for license purchase.
   - 1-click License Key activation (`PRO-2026-DEMO-TEST`).
 - **Cloud Delta Sync**:
   - Batch upload pending transactions, products, categories, customers, and debt ledgers.

@@ -17,7 +17,7 @@ export class SubscriptionService {
     });
 
     if (!license) {
-      throw new BadRequestException('License key does not exist. Please contact Telegram @YourPOS_Admin.');
+      throw new BadRequestException('License key does not exist. Please contact Telegram @khantlin0000.');
     }
 
     if (license.isUsed && license.usedByShopId !== dto.shopId) {

@@ -160,7 +160,7 @@ class _ActivationDialogState extends ConsumerState<ActivationDialog> {
                   ),
                   const SizedBox(height: 6),
                   const SelectableText(
-                    '@YourPOS_Admin',
+                    '@khantlin0000',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
