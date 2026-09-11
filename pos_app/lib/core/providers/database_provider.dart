@@ -38,6 +38,14 @@ final customersStreamProvider = StreamProvider<List<Customer>>((ref) {
   return ref.watch(customerDaoProvider).watchCustomers();
 });
 
+final allInventoryProductsStreamProvider = StreamProvider<List<Product>>((ref) {
+  return ref.watch(productDaoProvider).watchAllInventoryProducts();
+});
+
+final categoriesStreamProvider = StreamProvider<List<Category>>((ref) {
+  return ref.watch(productDaoProvider).watchCategories();
+});
+
 /// Shop & Subscription Information Provider
 final currentShopProvider = FutureProvider<Shop?>((ref) async {
   final db = ref.watch(databaseProvider);

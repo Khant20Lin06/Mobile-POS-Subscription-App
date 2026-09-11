@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../diagnostics/diagnostics_screen.dart';
+import '../inventory/screens/inventory_screen.dart';
 import '../pos/screens/pos_screen.dart';
 import '../reports/screens/daily_z_report_screen.dart';
 
@@ -15,6 +16,7 @@ class _AppShellState extends State<AppShell> {
 
   final _screens = const [
     PosScreen(),
+    InventoryScreen(),
     DailyZReportScreen(),
     DiagnosticsScreen(),
   ];
@@ -64,6 +66,11 @@ class _AppShellState extends State<AppShell> {
                       label: Text('POS Sales'),
                     ),
                     NavigationRailDestination(
+                      icon: Icon(Icons.inventory_2_outlined),
+                      selectedIcon: Icon(Icons.inventory_2),
+                      label: Text('Inventory'),
+                    ),
+                    NavigationRailDestination(
                       icon: Icon(Icons.receipt_long_outlined),
                       selectedIcon: Icon(Icons.receipt_long),
                       label: Text('Z-Report'),
@@ -101,7 +108,12 @@ class _AppShellState extends State<AppShell> {
                 NavigationDestination(
                   icon: Icon(Icons.point_of_sale_outlined, color: Color(0xFF94A3B8)),
                   selectedIcon: Icon(Icons.point_of_sale, color: Color(0xFF60A5FA)),
-                  label: 'POS Register',
+                  label: 'Register',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.inventory_2_outlined, color: Color(0xFF94A3B8)),
+                  selectedIcon: Icon(Icons.inventory_2, color: Color(0xFF60A5FA)),
+                  label: 'Inventory',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.receipt_long_outlined, color: Color(0xFF94A3B8)),
@@ -111,7 +123,7 @@ class _AppShellState extends State<AppShell> {
                 NavigationDestination(
                   icon: Icon(Icons.storage_outlined, color: Color(0xFF94A3B8)),
                   selectedIcon: Icon(Icons.storage, color: Color(0xFF60A5FA)),
-                  label: 'Database',
+                  label: 'DB & Sync',
                 ),
               ],
             ),

@@ -82,4 +82,54 @@ class ProductDao extends DatabaseAccessor<AppDatabase> with _$ProductDaoMixin {
       );
     }
   }
+
+  /// Watch all non-deleted products for Inventory management
+  Stream<List<Product>> watchAllInventoryProducts() {
+    return (select(products)
+          ..where((tbl) => tbl.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm(expression: t.name)]))
+        .watch();
+  }
+
+  /// Adjust stock by delta (+ for Stock In, - for Stock Out/Wastage)
+  Future<void> adjustStock(String productId, int quantityDelta) async {
+    final product = await (select(products)..where((t) => t.id.equals(productId))).getSingleOrNull();
+    if (product != null) {
+      final newQuantity = (product.stockQuantity + quantityDelta).clamp(0, 999999);
+      await (update(products)..where((t) => t.id.equals(productId))).write(
+        ProductsCompanion(
+          stockQuantity: Value(newQuantity),
+          updatedAt: Value(DateTime.now().toUtc()),
+          syncStatus: const Value('pending'),
+        ),
+      );
+    }
+  }
+
+  /// Set exact stock count (Inventory count correction)
+  Future<void> setExactStock(String productId, int exactQuantity) async {
+    final product = await (select(products)..where((t) => t.id.equals(productId))).getSingleOrNull();
+    if (product != null) {
+      await (update(products)..where((t) => t.id.equals(productId))).write(
+        ProductsCompanion(
+          stockQuantity: Value(exactQuantity.clamp(0, 999999)),
+          updatedAt: Value(DateTime.now().toUtc()),
+          syncStatus: const Value('pending'),
+        ),
+      );
+    }
+  }
+
+  /// Watch all categories
+  Stream<List<Category>> watchCategories() {
+    return (select(db.categories)
+          ..where((tbl) => tbl.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm(expression: t.sortOrder), (t) => OrderingTerm(expression: t.name)]))
+        .watch();
+  }
+
+  /// Insert new category
+  Future<int> insertCategory(CategoriesCompanion entry) {
+    return into(db.categories).insert(entry);
+  }
 }
