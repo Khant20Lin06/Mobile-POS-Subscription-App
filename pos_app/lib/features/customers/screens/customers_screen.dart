@@ -98,8 +98,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         elevation: 0,
         title: const Row(
           children: [
-            AppHeaderLogo(size: 28, borderRadius: 8),
-            SizedBox(width: 10),
+            AppHeaderLogo(),
             Expanded(
               child: Text(
                 'Customers & Debt Ledger',
@@ -326,150 +325,127 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                 color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF334155),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                // Top Row: Avatar + Name/Phone + Debt Badge
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundColor: avatarColor.withValues(alpha: 0.2),
-                      child: Text(
-                        _getInitials(customer.name),
-                        style: TextStyle(color: avatarColor, fontWeight: FontWeight.bold, fontSize: 12),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            customer.name,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Icon(Icons.phone, size: 11, color: customer.phone != null ? const Color(0xFF64748B) : Colors.transparent),
-                              const SizedBox(width: 4),
-                              Text(
-                                customer.phone ?? 'No phone',
-                                style: TextStyle(
-                                  color: customer.phone != null ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.15) : const Color(0xFF10B981).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF10B981).withValues(alpha: 0.4),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${_currencyFormat.format(customer.totalDebt)} MMK',
-                            style: TextStyle(
-                              color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            hasDebt ? 'Debt Due' : 'No Debt',
-                            style: TextStyle(
-                              color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
-                              fontSize: 9,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: avatarColor.withValues(alpha: 0.2),
+                  child: Text(
+                    _getInitials(customer.name),
+                    style: TextStyle(color: avatarColor, fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
                 ),
-                const SizedBox(height: 8),
-                const Divider(color: Color(0xFF334155), height: 1),
-                const SizedBox(height: 4),
-
-                // Bottom Row: Action buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (hasDebt)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 6),
-                        child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            backgroundColor: const Color(0xFF10B981).withValues(alpha: 0.15),
-                            foregroundColor: const Color(0xFF10B981),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          icon: const Icon(Icons.payments_outlined, size: 15),
-                          label: const Text('Repay', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                          onPressed: () => DebtRepaymentDialog.show(context, customer),
-                        ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        customer.name,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Statement',
-                      icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF38BDF8), size: 18),
-                      onPressed: () => CustomerStatementDialog.show(context, customer),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.phone, size: 10, color: customer.phone != null ? const Color(0xFF64748B) : Colors.transparent),
+                          const SizedBox(width: 3),
+                          Text(
+                            customer.phone ?? 'No phone',
+                            style: TextStyle(
+                              color: customer.phone != null ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.15) : const Color(0xFF10B981).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: hasDebt ? const Color(0xFFEF4444).withValues(alpha: 0.4) : const Color(0xFF10B981).withValues(alpha: 0.4),
                     ),
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 20),
-                      tooltip: 'Actions',
-                      color: const Color(0xFF1E293B),
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: const BorderSide(color: Color(0xFF334155)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_currencyFormat.format(customer.totalDebt)} MMK',
+                        style: TextStyle(
+                          color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
                       ),
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          CustomerFormDialog.show(context, customerToEdit: customer);
-                        } else if (value == 'delete') {
-                          _confirmDeleteCustomer(customer);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem<String>(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
-                              SizedBox(width: 8),
-                              Text('Edit Customer', style: TextStyle(color: Colors.white, fontSize: 13)),
-                            ],
-                          ),
+                      Text(
+                        hasDebt ? 'Debt Due' : 'No Debt',
+                        style: TextStyle(
+                          color: hasDebt ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                          fontSize: 8,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
-                              SizedBox(width: 8),
-                              Text('Delete Customer', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (hasDebt)
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    tooltip: 'Repay Debt',
+                    icon: const Icon(Icons.payments_outlined, color: Color(0xFF10B981), size: 19),
+                    onPressed: () => DebtRepaymentDialog.show(context, customer),
+                  ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Statement',
+                  icon: const Icon(Icons.receipt_long_outlined, color: Color(0xFF38BDF8), size: 18),
+                  onPressed: () => CustomerStatementDialog.show(context, customer),
+                ),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 20),
+                  tooltip: 'Actions',
+                  color: const Color(0xFF1E293B),
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(color: Color(0xFF334155)),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      CustomerFormDialog.show(context, customerToEdit: customer);
+                    } else if (value == 'delete') {
+                      _confirmDeleteCustomer(customer);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem<String>(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
+                          SizedBox(width: 8),
+                          Text('Edit Customer', style: TextStyle(color: Colors.white, fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                          SizedBox(width: 8),
+                          Text('Delete Customer', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
+                        ],
+                      ),
                     ),
                   ],
                 ),

@@ -39,8 +39,7 @@ class SettingsScreen extends ConsumerWidget {
         elevation: 0,
         title: Row(
           children: [
-            const AppHeaderLogo(size: 34, borderRadius: 10),
-            const SizedBox(width: 12),
+            const AppHeaderLogo(),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

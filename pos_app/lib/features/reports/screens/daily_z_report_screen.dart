@@ -96,8 +96,7 @@ class _DailyZReportScreenState extends ConsumerState<DailyZReportScreen> {
         elevation: 0,
         title: Row(
           children: [
-            const AppHeaderLogo(size: 32, borderRadius: 8),
-            const SizedBox(width: 10),
+            const AppHeaderLogo(),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

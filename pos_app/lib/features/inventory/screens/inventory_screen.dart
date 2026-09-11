@@ -107,8 +107,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         elevation: 0,
         title: const Row(
           children: [
-            AppHeaderLogo(size: 28, borderRadius: 8),
-            SizedBox(width: 10),
+            AppHeaderLogo(),
             Expanded(
               child: Text(
                 'Stock & Inventory',
@@ -422,33 +421,32 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                         : const Color(0xFF334155),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                // Top Row: Product Image + Name/Category + Retail Price & Stock Badge
-                Row(
-                  children: [
-                    ProductImageWidget(
-                      imageUrl: product.imageUrl,
-                      width: 44,
-                      height: 44,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                ProductImageWidget(
+                  imageUrl: product.imageUrl,
+                  width: 44,
+                  height: 44,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        product.name,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
                         children: [
-                          Text(
-                            product.name,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
                           if (category != null) ...[
-                            const SizedBox(height: 2),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF0F172A),
                                 borderRadius: BorderRadius.circular(4),
@@ -457,127 +455,77 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                               child: Text(
                                 category.name,
                                 style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 9),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            const SizedBox(width: 6),
                           ],
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: stockBadgeColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: stockBadgeColor.withValues(alpha: 0.4)),
+                            ),
+                            child: Text(
+                              product.trackStock
+                                  ? (isOutOfStock ? 'Out' : '${product.stockQuantity} left')
+                                  : '∞ Stock',
+                              style: TextStyle(color: stockBadgeColor, fontSize: 9, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${_currencyFormat.format(product.sellingPrice)} MMK',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  tooltip: 'Stock Movement (+/-)',
+                  icon: const Icon(Icons.swap_vert_circle_outlined, color: Color(0xFF38BDF8), size: 21),
+                  onPressed: () => StockAdjustmentDialog.show(context, product),
+                ),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 20),
+                  tooltip: 'Actions',
+                  color: const Color(0xFF1E293B),
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(color: Color(0xFF334155)),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      _openProductForm(productToEdit: product);
+                    } else if (value == 'delete') {
+                      _confirmDeleteProduct(product);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem<String>(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
+                          SizedBox(width: 8),
+                          Text('Edit Product', style: TextStyle(color: Colors.white, fontSize: 13)),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${_currencyFormat.format(product.sellingPrice)} MMK',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                        ),
-                        const SizedBox(height: 2),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: stockBadgeColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: stockBadgeColor.withValues(alpha: 0.4)),
-                          ),
-                          child: Text(
-                            product.trackStock
-                                ? (isOutOfStock ? 'Out' : '${product.stockQuantity} left')
-                                : '∞ Stock',
-                            style: TextStyle(color: stockBadgeColor, fontSize: 9, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Middle Row: Barcode + Cost + Margin
-                Row(
-                  children: [
-                    if (product.barcode != null && product.barcode!.isNotEmpty) ...[
-                      const Icon(Icons.qr_code, size: 11, color: Color(0xFF64748B)),
-                      const SizedBox(width: 3),
-                      Text(
-                        product.barcode!,
-                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 10, fontFamily: 'monospace'),
+                    const PopupMenuItem<String>(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
+                          SizedBox(width: 8),
+                          Text('Delete Product', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      'Cost: ${_currencyFormat.format(product.costPrice)} MMK',
-                      style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '(${marginPct.toStringAsFixed(0)}% Margin)',
-                      style: TextStyle(
-                        color: marginPct >= 20 ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                const Divider(color: Color(0xFF334155), height: 1),
-                const SizedBox(height: 4),
-
-                // Bottom Row: Action buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton.icon(
-                      style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFF38BDF8).withValues(alpha: 0.15),
-                        foregroundColor: const Color(0xFF38BDF8),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      icon: const Icon(Icons.swap_vert_circle_outlined, size: 15),
-                      label: const Text('Stock (+/-)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                      onPressed: () => StockAdjustmentDialog.show(context, product),
-                    ),
-                    const SizedBox(width: 4),
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert, color: Color(0xFF94A3B8), size: 20),
-                      tooltip: 'Actions',
-                      color: const Color(0xFF1E293B),
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: const BorderSide(color: Color(0xFF334155)),
-                      ),
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          _openProductForm(productToEdit: product);
-                        } else if (value == 'delete') {
-                          _confirmDeleteProduct(product);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem<String>(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit_outlined, color: Color(0xFF38BDF8), size: 18),
-                              SizedBox(width: 8),
-                              Text('Edit Product', style: TextStyle(color: Colors.white, fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline, color: Color(0xFFEF4444), size: 18),
-                              SizedBox(width: 8),
-                              Text('Delete Product', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
-                            ],
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
