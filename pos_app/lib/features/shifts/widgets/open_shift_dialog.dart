@@ -72,13 +72,15 @@ class _OpenShiftDialogState extends ConsumerState<OpenShiftDialog> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.lock_clock, color: Color(0xFF10B981), size: 24),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Open Cashier Shift (အဆိုင်းဖွင့်ခြင်း)',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  const Icon(Icons.lock_clock, color: Color(0xFF10B981), size: 22),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Open Cashier Shift (အဆိုင်းဖွင့်ခြင်း)',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  const Spacer(),
                   IconButton(
                     icon: const Icon(Icons.close, color: Color(0xFF94A3B8), size: 20),
                     onPressed: () => Navigator.pop(context),

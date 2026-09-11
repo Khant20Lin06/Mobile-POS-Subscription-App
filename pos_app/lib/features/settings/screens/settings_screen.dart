@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drift/drift.dart' as drift;
+import '../../../core/database/app_database.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../inventory/widgets/category_management_dialog.dart';
@@ -13,6 +15,7 @@ import '../../auth/widgets/admin_override_dialog.dart';
 import '../../../core/database/seeder.dart';
 import '../widgets/shop_profile_dialog.dart';
 import '../widgets/printer_settings_dialog.dart';
+import '../widgets/scan_gun_settings_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -333,51 +336,145 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
-          // 5. Cashier PIN & Security Card
+          // 6. Barcode Scan Gun Setup Card
+          _buildCard(
+            title: lang == AppLanguage.my ? 'ဘားကုဒ် စကန်ဖတ်စက် ဆက်တင်' : 'Barcode Scan Gun & Hardware',
+            icon: Icons.qr_code_scanner,
+            iconColor: const Color(0xFF10B981),
+            child: Column(
+              children: [
+                _buildInfoRow(
+                  lang == AppLanguage.my ? 'စကန်ဖတ်စက် အခြေအနေ' : 'Scanner Status',
+                  'Active (Plug & Play)',
+                ),
+                const Divider(color: Color(0xFF334155), height: 16),
+                _buildInfoRow(
+                  lang == AppLanguage.my ? 'ချိတ်ဆက်မှု အမျိုးအစား' : 'Supported Modes',
+                  'USB Laser / Bluetooth / Camera',
+                ),
+                const Divider(color: Color(0xFF334155), height: 16),
+                _buildInfoRow(
+                  lang == AppLanguage.my ? 'အလိုအလျောက် ပစ္စည်းထည့်' : 'Auto Add to Cart',
+                  'Enabled (Instant Match)',
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF10B981),
+                    side: const BorderSide(color: Color(0xFF10B981)),
+                    minimumSize: const Size(double.infinity, 38),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.tune, size: 16),
+                  label: Text(
+                    lang == AppLanguage.my ? 'စကန်ဖတ်စက် ဆက်တင် / Test Scan' : 'Configure Scan Gun & Live Test',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                  ),
+                  onPressed: () => ScanGunSettingsDialog.show(context),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // 7. Cashier PIN & Security Card (Admin Edit Enabled)
           _buildCard(
             title: AppTranslations.tr('set_security', lang),
             icon: Icons.security,
             iconColor: const Color(0xFFEF4444),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFEF4444),
-                      side: const BorderSide(color: Color(0xFFEF4444)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    icon: const Icon(Icons.lock, size: 16),
-                    label: Text(lang == AppLanguage.my ? 'သော့ခတ်မည်' : 'Lock Screen', style: const TextStyle(fontSize: 12)),
-                    onPressed: () {
-                      ref.read(isTerminalLockedProvider.notifier).state = true;
-                      PinLoginDialog.show(context, isLockScreen: true);
-                    },
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0F172A),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF334155)),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: const Color(0xFFF59E0B),
+                        child: const Text('A', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              activeUser != null && activeUser.role == 'owner' ? '${activeUser.name} (Admin)' : 'Administrator (Owner)',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                            Text(
+                              lang == AppLanguage.my ? 'အက်ဒမင် PIN ဖြင့် ဆက်တင်နှင့် အခွင့်အရေးများ ထိန်းချုပ်နိုင်သည်' : 'Full access & administrative override PIN',
+                              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFF59E0B),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        icon: const Icon(Icons.edit, size: 14),
+                        label: Text(
+                          lang == AppLanguage.my ? 'PIN ပြင်မည်' : 'Edit PIN',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () => _handleEditAdmin(context, ref, lang),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF334155),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFEF4444),
+                          side: const BorderSide(color: Color(0xFFEF4444)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(Icons.lock, size: 16),
+                        label: Text(lang == AppLanguage.my ? 'သော့ခတ်မည်' : 'Lock Screen', style: const TextStyle(fontSize: 12)),
+                        onPressed: () {
+                          ref.read(isTerminalLockedProvider.notifier).state = true;
+                          PinLoginDialog.show(context, isLockScreen: true);
+                        },
+                      ),
                     ),
-                    icon: const Icon(Icons.people, size: 16),
-                    label: Text(lang == AppLanguage.my ? 'ဝန်ထမ်း PIN စာရင်း' : 'Staff Directory', style: const TextStyle(fontSize: 12)),
-                    onPressed: () async {
-                      if (activeUser?.role == 'cashier') {
-                        final approved = await AdminOverrideDialog.requestApproval(
-                          context,
-                          actionTitle: 'Manage Staff Directory',
-                        );
-                        if (!approved) return;
-                      }
-                      if (context.mounted) {
-                        StaffManagementDialog.show(context);
-                      }
-                    },
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF334155),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(Icons.people, size: 16),
+                        label: Text(lang == AppLanguage.my ? 'ဝန်ထမ်း PIN စာရင်း' : 'Staff Directory', style: const TextStyle(fontSize: 12)),
+                        onPressed: () async {
+                          if (activeUser?.role == 'cashier') {
+                            final approved = await AdminOverrideDialog.requestApproval(
+                              context,
+                              actionTitle: 'Manage Staff Directory',
+                            );
+                            if (!approved) return;
+                          }
+                          if (context.mounted) {
+                            StaffManagementDialog.show(context);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -522,6 +619,153 @@ class SettingsScreen extends ConsumerWidget {
         Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
         Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
       ],
+    );
+  }
+
+  Future<void> _handleEditAdmin(BuildContext context, WidgetRef ref, AppLanguage lang) async {
+    final activeUser = ref.read(currentUserProvider);
+    if (activeUser?.role == 'cashier') {
+      final approved = await AdminOverrideDialog.requestApproval(
+        context,
+        actionTitle: 'Edit Admin Security PIN',
+      );
+      if (!approved) return;
+    }
+
+    final shop = await ref.read(currentShopProvider.future);
+    if (shop == null) return;
+
+    final userDao = ref.read(userDaoProvider);
+    final users = await (userDao.select(userDao.users)
+          ..where((t) => t.shopId.equals(shop.id) & t.role.equals('owner') & t.deletedAt.isNull()))
+        .get();
+    final ownerUser = users.isNotEmpty ? users.first : activeUser;
+
+    if (!context.mounted) return;
+
+    final nameController = TextEditingController(text: ownerUser?.name ?? 'Admin (Owner)');
+    final pinController = TextEditingController(text: ownerUser?.pinCode ?? '1234');
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.admin_panel_settings, color: Color(0xFFF59E0B), size: 22),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  lang == AppLanguage.my ? 'အက်ဒမင် PIN ပြင်ဆင်ခြင်း' : 'Edit Admin PIN & Credentials',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: lang == AppLanguage.my ? 'အက်ဒမင် အမည် *' : 'Admin Name *',
+                    labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                    filled: true,
+                    fillColor: const Color(0xFF0F172A),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  validator: (val) => val == null || val.trim().isEmpty ? 'Admin name is required' : null,
+                ),
+                const SizedBox(height: 14),
+                TextFormField(
+                  controller: pinController,
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  style: const TextStyle(color: Colors.white, letterSpacing: 4, fontWeight: FontWeight.bold, fontSize: 16),
+                  decoration: InputDecoration(
+                    labelText: lang == AppLanguage.my ? 'လုံခြုံရေး PIN (၄ မှ ၆ လုံး) *' : 'Security PIN (4-6 digits) *',
+                    labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                    filled: true,
+                    fillColor: const Color(0xFF0F172A),
+                    counterText: '',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  validator: (val) {
+                    if (val == null || val.trim().length < 4) {
+                      return 'PIN must be at least 4 digits';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(lang == AppLanguage.my ? 'မလုပ်တော့ပါ' : 'Cancel', style: const TextStyle(color: Color(0xFF94A3B8))),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF59E0B),
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () async {
+                if (formKey.currentState?.validate() ?? false) {
+                  final now = DateTime.now().toUtc();
+                  if (ownerUser != null) {
+                    await userDao.updateUser(
+                      UsersCompanion(
+                        id: drift.Value(ownerUser.id),
+                        shopId: drift.Value(shop.id),
+                        name: drift.Value(nameController.text.trim()),
+                        pinCode: drift.Value(pinController.text.trim()),
+                        role: const drift.Value('owner'),
+                        updatedAt: drift.Value(now),
+                        syncStatus: const drift.Value('pending'),
+                      ),
+                    );
+                    final updated = await userDao.getUserById(ownerUser.id);
+                    if (updated != null && ref.read(currentUserProvider)?.id == ownerUser.id) {
+                      ref.read(currentUserProvider.notifier).setUser(updated);
+                    }
+                  }
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: const Color(0xFF10B981),
+                        content: Text(
+                          lang == AppLanguage.my
+                              ? 'အက်ဒမင် PIN နှင့် အချက်အလက် အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ'
+                              : 'Admin PIN and credentials updated successfully!',
+                        ),
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Text(
+                lang == AppLanguage.my ? 'သိမ်းမည်' : 'Save Changes',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

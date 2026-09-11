@@ -43,6 +43,9 @@ class ReceiptDialog extends StatelessWidget {
     final slipRef = orderNumber ?? receipt?.orderNumber ?? 'Slip';
     final screenHeight = MediaQuery.of(context).size.height;
 
+    final is80mm = formattedText.contains('=' * 40);
+    final paperWidth = is80mm ? 370.0 : 260.0;
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
@@ -104,8 +107,8 @@ class ReceiptDialog extends StatelessWidget {
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.topCenter,
                     child: Container(
-                      width: 320,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                      width: paperWidth,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFFBEB), // Warm thermal paper tint
                         borderRadius: BorderRadius.circular(8),

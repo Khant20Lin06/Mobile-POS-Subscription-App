@@ -523,13 +523,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 builder: (context, gridConstraints) {
                   // Dynamic column count and compact aspect ratio based on available catalog width
                   int crossAxisCount = 2;
-                  double childAspectRatio = 1.28;
+                  double childAspectRatio = 1.10;
                   if (gridConstraints.maxWidth > 800) {
                     crossAxisCount = 4;
-                    childAspectRatio = 1.22;
+                    childAspectRatio = 1.15;
                   } else if (gridConstraints.maxWidth > 500) {
                     crossAxisCount = 3;
-                    childAspectRatio = 1.24;
+                    childAspectRatio = 1.12;
                   }
 
                   return GridView.builder(
@@ -680,57 +680,59 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Product Image with Stock Badge overlay
-              Stack(
-                children: [
-                  ProductImageWidget(
-                    imageUrl: product.imageUrl,
-                    width: double.infinity,
-                    height: 86,
-                    fit: BoxFit.cover,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  ),
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: isOutOfStock
-                            ? const Color(0xFFEF4444).withValues(alpha: 0.9)
-                            : product.stockQuantity <= 10
-                                ? const Color(0xFFF59E0B).withValues(alpha: 0.9)
-                                : const Color(0xFF0F172A).withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
+              // Top Product Image with Stock Badge overlay (Expands to fill available top space)
+              Expanded(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ProductImageWidget(
+                      imageUrl: product.imageUrl,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                    ),
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
                           color: isOutOfStock
-                              ? Colors.redAccent
+                              ? const Color(0xFFEF4444).withValues(alpha: 0.9)
                               : product.stockQuantity <= 10
-                                  ? Colors.amberAccent
-                                  : const Color(0xFF10B981),
-                          width: 0.8,
+                                  ? const Color(0xFFF59E0B).withValues(alpha: 0.9)
+                                  : const Color(0xFF0F172A).withValues(alpha: 0.85),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: isOutOfStock
+                                ? Colors.redAccent
+                                : product.stockQuantity <= 10
+                                    ? Colors.amberAccent
+                                    : const Color(0xFF10B981),
+                            width: 0.8,
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        isOutOfStock ? 'Out' : '${product.stockQuantity}',
-                        style: TextStyle(
-                          color: isOutOfStock
-                              ? Colors.white
-                              : product.stockQuantity <= 10
-                                  ? Colors.white
-                                  : const Color(0xFF34D399),
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                        child: Text(
+                          isOutOfStock ? 'Out' : '${product.stockQuantity}',
+                          style: TextStyle(
+                            color: isOutOfStock
+                                ? Colors.white
+                                : product.stockQuantity <= 10
+                                    ? Colors.white
+                                    : const Color(0xFF34D399),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
-              // Product Details (Compact & tight, zero huge empty gap!)
+              // Product Details (Snug & tight at the bottom with zero dangling empty void!)
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -740,19 +742,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 11.5,
+                        fontSize: 12,
                         height: 1.15,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       '${_currencyFormat.format(product.sellingPrice)} MMK',
                       style: const TextStyle(
                         color: Color(0xFF10B981),
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 12.5,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

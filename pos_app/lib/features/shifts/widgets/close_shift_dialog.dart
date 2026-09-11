@@ -78,13 +78,15 @@ class _CloseShiftDialogState extends ConsumerState<CloseShiftDialog> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.fact_check, color: Color(0xFFF59E0B), size: 24),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Close Shift (အဆိုင်းပိတ် ငွေစစ်ခြင်း)',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                    const Icon(Icons.fact_check, color: Color(0xFFF59E0B), size: 22),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Close Shift (အဆိုင်းပိတ် ငွေစစ်ခြင်း)',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.close, color: Color(0xFF94A3B8), size: 20),
                       onPressed: () => Navigator.pop(context),
