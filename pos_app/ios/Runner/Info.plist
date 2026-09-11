@@ -45,5 +45,13 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>DOT POS requires Bluetooth access to discover and print to wireless ESC/POS thermal printers and connect barcode scan guns.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>DOT POS requires Bluetooth access to discover and print to wireless ESC/POS thermal printers and connect barcode scan guns.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>DOT POS requires local network communication to send print commands to WiFi and LAN thermal printers.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>DOT POS requires camera access to scan product barcodes and QR codes.</string>
 </dict>
 </plist>

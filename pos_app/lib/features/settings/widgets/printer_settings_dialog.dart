@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/hardware/thermal_receipt_service.dart';
+import '../../../core/hardware/hardware_permission_service.dart';
 import '../../pos/widgets/receipt_dialog.dart';
 
 class PrinterSettingsDialog extends ConsumerStatefulWidget {
@@ -60,6 +61,22 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
   Future<void> _scanPrinters() async {
     setState(() => _isScanning = true);
     try {
+      if (_connectionType == 'bluetooth') {
+        final granted = await HardwarePermissionService.requestBluetoothPermissions();
+        if (!granted && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color(0xFFD97706),
+              content: const Text('Bluetooth permission needed to scan for wireless printers.'),
+              action: SnackBarAction(
+                label: 'Settings',
+                textColor: Colors.white,
+                onPressed: HardwarePermissionService.openSettings,
+              ),
+            ),
+          );
+        }
+      }
       final list = await SystemThermalPrinterService.listPrinters();
       if (mounted) {
         setState(() {
@@ -282,7 +299,11 @@ class _PrinterSettingsDialogState extends ConsumerState<PrinterSettingsDialog> {
                       fontSize: 12,
                     ),
                     avatar: const Icon(Icons.bluetooth, size: 14, color: Colors.white),
-                    onSelected: (_) => setState(() => _connectionType = 'bluetooth'),
+                    onSelected: (_) async {
+                      setState(() => _connectionType = 'bluetooth');
+                      await HardwarePermissionService.requestBluetoothPermissions();
+                      _scanPrinters();
+                    },
                   ),
                   ChoiceChip(
                     label: const Text('WiFi / LAN Network'),

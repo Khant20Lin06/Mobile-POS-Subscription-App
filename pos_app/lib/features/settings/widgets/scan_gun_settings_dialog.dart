@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/providers/database_provider.dart';
 import '../../../core/hardware/barcode_scan_service.dart';
+import '../../../core/hardware/hardware_permission_service.dart';
 
 class ScanGunSettingsDialog extends ConsumerStatefulWidget {
   const ScanGunSettingsDialog({super.key});
@@ -187,7 +188,10 @@ class _ScanGunSettingsDialogState extends ConsumerState<ScanGunSettingsDialog> {
                       fontSize: 12,
                     ),
                     avatar: const Icon(Icons.bluetooth, size: 14, color: Colors.white),
-                    onSelected: (_) => setState(() => _scannerType = 'bluetooth_hid'),
+                    onSelected: (_) async {
+                      setState(() => _scannerType = 'bluetooth_hid');
+                      await HardwarePermissionService.requestBluetoothPermissions();
+                    },
                   ),
                   ChoiceChip(
                     label: const Text('Camera Scanner'),
@@ -199,7 +203,10 @@ class _ScanGunSettingsDialogState extends ConsumerState<ScanGunSettingsDialog> {
                       fontSize: 12,
                     ),
                     avatar: const Icon(Icons.camera_alt, size: 14, color: Colors.white),
-                    onSelected: (_) => setState(() => _scannerType = 'camera'),
+                    onSelected: (_) async {
+                      setState(() => _scannerType = 'camera');
+                      await HardwarePermissionService.requestCameraPermission();
+                    },
                   ),
                 ],
               ),
